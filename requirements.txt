@@ -1,4 +1,7 @@
 fastapi
 uvicorn
-httpx
+aiohttp
 websockets
+zlapi
+pycryptodome
+requests
