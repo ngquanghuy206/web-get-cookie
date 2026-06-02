@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zalo QR Login</title>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --card: #0d1b2e;
+    --border: rgba(0,149,255,0.25);
+    --blue: #0095ff;
+    --blue2: #0060cc;
+    --text: #e0f0ff;
+    --muted: rgba(255,255,255,0.4);
+    --green: #00c853;
+    --red: #f87171;
+    --yellow: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .logo {
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--blue), #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+    letter-spacing: -1px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 0 40px rgba(0,149,255,0.1), 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(0,149,255,0.07);
+    border: 1px solid rgba(0,149,255,0.15);
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .dot.active { background: var(--blue); box-shadow: 0 0 6px var(--blue); animation: pulse 1.5s infinite; }
+  .dot.success { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.error { background: var(--red); }
+  .dot.warn { background: var(--yellow); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* QR AREA */
+  .qr-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-height: 240px;
+    justify-content: center;
+  }
+  .qr-placeholder {
+    width: 200px; height: 200px;
+    border-radius: 16px;
+    border: 2px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--muted);
+    flex-direction: column; gap: 8px;
+  }
+  .qr-placeholder .icon { font-size: 36px; }
+
+  #qr-img {
+    width: 200px; height: 200px;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    display: none;
+    box-shadow: 0 0 20px rgba(0,149,255,0.2);
+  }
+  .qr-hint {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* SCANNED STATE */
+  .scanned-box {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(0,200,83,0.07);
+    border: 1.5px solid rgba(0,200,83,0.25);
+    text-align: center;
+  }
+  .scanned-box .check { font-size: 40px; }
+  .scanned-box .name { font-weight: 700; font-size: 16px; color: var(--green); }
+
+  /* RESULT BOX */
+  .result-box {
+    display: none;
+    margin-top: 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(0,200,83,0.07);
+    border: 1.5px solid rgba(0,200,83,0.25);
+  }
+  .result-header .avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--blue2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .result-header .info { flex: 1; }
+  .result-header .info .rname { font-weight: 700; font-size: 15px; }
+  .result-header .info .rphone { font-size: 12px; color: var(--muted); }
+
+  .field-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(0,149,255,0.6);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .field-value {
+    font-size: 12px;
+    font-family: monospace;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(0,149,255,0.05);
+    border: 1px solid rgba(0,149,255,0.15);
+    color: #7dd3fc;
+    word-break: break-all;
+    line-height: 1.6;
+    max-height: 120px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .field-value::-webkit-scrollbar { width: 4px; }
+  .field-value::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .copy-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), var(--blue2));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .copy-btn.copied {
+    background: linear-gradient(135deg, var(--green), #00a040);
+  }
+
+  /* ACTION BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .btn {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--blue2)); color: #fff; }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .tab {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: rgba(0,149,255,0.05);
+    color: var(--muted);
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, var(--blue), var(--blue2));
+    border-color: var(--blue);
+    color: #fff;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 24px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.1);
+    letter-spacing: 1px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid rgba(0,149,255,0.2);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="logo">🔐 Zalo QR Login</div>
+<div class="subtitle">Quét mã QR để lấy cookie Zalo của bạn</div>
+
+<div class="card">
+  <!-- STATUS -->
+  <div class="status-bar">
+    <div class="dot" id="dot"></div>
+    <span id="status-text">Nhấn "Bắt đầu" để tạo mã QR</span>
+  </div>
+
+  <!-- QR AREA -->
+  <div class="qr-wrap" id="qr-wrap">
+    <div class="qr-placeholder" id="qr-placeholder">
+      <span class="icon">📱</span>
+      <span>Mã QR sẽ hiện ở đây</span>
+    </div>
+    <img id="qr-img" alt="QR Code">
+    <div class="scanned-box" id="scanned-box">
+      <div class="check">✅</div>
+      <div>Đã quét thành công!</div>
+      <div class="name" id="scanned-name"></div>
+      <div style="font-size:12px;color:var(--muted)">Vui lòng xác nhận trên điện thoại...</div>
+    </div>
+    <div class="spinner" id="spinner" style="display:none"></div>
+    <div class="qr-hint" id="qr-hint"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-box" id="result-box">
+    <div class="result-header">
+      <div class="avatar">👤</div>
+      <div class="info">
+        <div class="rname" id="res-name">—</div>
+        <div class="rphone" id="res-phone">—</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('cookies')">🍪 Cookie String</div>
+      <div class="tab" onclick="switchTab('json')">{ } JSON</div>
+      <div class="tab" onclick="switchTab('info')">ℹ️ Thông tin</div>
+    </div>
+
+    <div class="tab-content active" id="tab-cookies">
+      <div class="field-label">Cookie String</div>
+      <div class="field-value" id="res-cookie-str">—</div>
+      <br>
+      <button class="copy-btn" onclick="copyField('res-cookie-str', this)">
+        📋 Sao chép Cookie String
+      </button>
+    </div>
+
+    <div class="tab-content" id="tab-json">
+      <div class="field-label">Cookie JSON</div>
+      <div class="field-value" id="res-cookie-json">—</div>
+      <br>
+      <button class="copy-btn" onclick="copyField('res-cookie-json', this)">
+        📋 Sao chép Cookie JSON
+      </button>
+    </div>
+
+    <div class="tab-content" id="tab-info">
+      <div class="field-label">User ID</div>
+      <div class="field-value" id="res-uid">—</div>
+      <br>
+      <div class="field-label">IMEI</div>
+      <div class="field-value" id="res-imei">—</div>
+      <br>
+      <button class="copy-btn" onclick="copyAll()">
+        📋 Sao chép tất cả
+      </button>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-start" onclick="startLogin()">🚀 Bắt đầu</button>
+    <button class="btn btn-outline" id="btn-reset" onclick="resetUI()" style="display:none">🔄 Làm mới</button>
+  </div>
+</div>
+
+<div class="footer">zalo-qr-login • cookie extractor</div>
+
+<script>
+let ws = null;
+let currentResult = null;
+
+const WS_HOST = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+  ? `ws://${location.host}/ws`
+  : `wss://${location.host}/ws`;
+
+function setStatus(msg, type = 'idle') {
+  document.getElementById('status-text').textContent = msg;
+  const dot = document.getElementById('dot');
+  dot.className = 'dot';
+  if (type === 'active') dot.classList.add('active');
+  if (type === 'success') dot.classList.add('success');
+  if (type === 'error') dot.classList.add('error');
+  if (type === 'warn') dot.classList.add('warn');
+}
+
+function showSpinner(show) {
+  document.getElementById('spinner').style.display = show ? 'block' : 'none';
+}
+
+function showQR(b64) {
+  document.getElementById('qr-placeholder').style.display = 'none';
+  document.getElementById('scanned-box').style.display = 'none';
+  const img = document.getElementById('qr-img');
+  img.src = 'data:image/png;base64,' + b64;
+  img.style.display = 'block';
+  document.getElementById('qr-hint').textContent = 'Mở Zalo → Quét mã QR';
+  showSpinner(false);
+}
+
+function showScanned(name) {
+  document.getElementById('qr-img').style.display = 'none';
+  document.getElementById('qr-placeholder').style.display = 'none';
+  const box = document.getElementById('scanned-box');
+  box.style.display = 'flex';
+  document.getElementById('scanned-name').textContent = name || '';
+  document.getElementById('qr-hint').textContent = '';
+  showSpinner(false);
+}
+
+function showResult(data) {
+  currentResult = data;
+  document.getElementById('qr-wrap').style.display = 'none';
+
+  document.getElementById('res-name').textContent  = data.name  || 'N/A';
+  document.getElementById('res-phone').textContent = data.phone || 'N/A';
+  document.getElementById('res-uid').textContent   = data.user_id || 'N/A';
+  document.getElementById('res-imei').textContent  = data.imei || 'N/A';
+  document.getElementById('res-cookie-str').textContent  = data.cookie_str || '';
+  document.getElementById('res-cookie-json').textContent = JSON.stringify(data.cookies, null, 2);
+
+  const box = document.getElementById('result-box');
+  box.style.display = 'flex';
+
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-reset').style.display = 'block';
+}
+
+function startLogin() {
+  resetUI(false);
+  const sid = Math.random().toString(36).slice(2);
+
+  setStatus('Đang kết nối...', 'active');
+  showSpinner(true);
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-reset').style.display = 'block';
+
+  ws = new WebSocket(`${WS_HOST}/${sid}`);
+
+  ws.onopen = () => setStatus('Đang tạo mã QR...', 'active');
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === 'status') {
+      setStatus(msg.msg, 'active');
+      showSpinner(false);
+    }
+    else if (msg.type === 'qr') {
+      setStatus('Chờ quét mã QR...', 'active');
+      showQR(msg.image);
+    }
+    else if (msg.type === 'scanned') {
+      setStatus('Đã quét! Đang chờ xác nhận...', 'active');
+      showScanned(msg.name);
+    }
+    else if (msg.type === 'expired') {
+      setStatus('Mã QR đã hết hạn. Thử lại!', 'warn');
+      showSpinner(false);
+      toast('⏰ Mã QR hết hạn!', '#f59e0b');
+      document.getElementById('btn-start').disabled = false;
+    }
+    else if (msg.type === 'declined') {
+      setStatus('Đã từ chối đăng nhập.', 'error');
+      showSpinner(false);
+      toast('❌ Đăng nhập bị từ chối', '#f87171');
+      document.getElementById('btn-start').disabled = false;
+    }
+    else if (msg.type === 'success') {
+      setStatus(`Đã lấy cookie của ${msg.name}!`, 'success');
+      showResult(msg);
+      toast('✅ Lấy cookie thành công!', '#00c853');
+    }
+    else if (msg.type === 'error') {
+      setStatus('Lỗi: ' + msg.msg, 'error');
+      showSpinner(false);
+      toast('❌ ' + msg.msg, '#f87171');
+      document.getElementById('btn-start').disabled = false;
+    }
+  };
+
+  ws.onclose = () => {
+    if (document.getElementById('dot').classList.contains('active')) {
+      setStatus('Kết nối bị ngắt.', 'error');
+    }
+    document.getElementById('btn-start').disabled = false;
+  };
+
+  ws.onerror = () => {
+    setStatus('Không thể kết nối server.', 'error');
+    toast('❌ Không thể kết nối!', '#f87171');
+    document.getElementById('btn-start').disabled = false;
+  };
+}
+
+function resetUI(full = true) {
+  if (ws) { ws.close(); ws = null; }
+  currentResult = null;
+
+  document.getElementById('qr-wrap').style.display = 'flex';
+  document.getElementById('result-box').style.display = 'none';
+  document.getElementById('qr-img').style.display = 'none';
+  document.getElementById('qr-placeholder').style.display = 'flex';
+  document.getElementById('scanned-box').style.display = 'none';
+  document.getElementById('qr-hint').textContent = '';
+  document.getElementById('btn-start').disabled = false;
+
+  if (full) {
+    document.getElementById('btn-reset').style.display = 'none';
+    setStatus('Nhấn "Bắt đầu" để tạo mã QR');
+    showSpinner(false);
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['cookies','json','info'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function copyField(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Đã sao chép!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyAll() {
+  if (!currentResult) return;
+  const text = [
+    `Name: ${currentResult.name}`,
+    `Phone: ${currentResult.phone}`,
+    `UserID: ${currentResult.user_id}`,
+    `IMEI: ${currentResult.imei}`,
+    `Cookie: ${currentResult.cookie_str}`,
+  ].join('\n');
+  navigator.clipboard.writeText(text).then(() => toast('✅ Đã sao chép tất cả!', '#00c853'));
+}
+
+function toast(msg, color) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.background = color;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+</script>
+</body>
+</html>
