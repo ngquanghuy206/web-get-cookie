@@ -384,9 +384,9 @@
 let ws = null;
 let currentResult = null;
 
-const WS_HOST = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-  ? `ws://${location.host}/ws`
-  : `wss://${location.host}/ws`;
+// Auto-detect: works on Render, Railway, local
+const WS_PROTO = location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_HOST = WS_PROTO + '//' + location.host + '/ws';
 
 function setStatus(msg, type = 'idle') {
   document.getElementById('status-text').textContent = msg;
