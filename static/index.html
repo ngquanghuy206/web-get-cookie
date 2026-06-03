@@ -996,8 +996,8 @@ function startLogin(){
     else if(msg.type==='success'){setStatus('✅ Lấy cookie thành công!','ok');showResult(msg);toast('✅ Lấy cookie thành công!','#00e676');updateHistBadge();playSfx('success');}
     else if(msg.type==='error'){setStatus('Lỗi: '+msg.msg,'err');document.getElementById('btn-start').disabled=false;toast('❌ '+msg.msg,'#ff5252');playSfx('error');}
   };
-  ws.onclose=()=>{if(document.getElementById('dot').classList.contains('active'))setStatus('Mất kết nối.','err');document.getElementById('btn-start').disabled=false;};
-  ws.onerror=()=>{setStatus('Không thể kết nối server.','err');toast('❌ Không kết nối được!','#ff5252');document.getElementById('btn-start').disabled=false;};
+  ws.onclose=()=>{if(document.getElementById('dot').classList.contains('active')&&!currentData)setStatus('Mất kết nối.','err');document.getElementById('btn-start').disabled=false;};
+  ws.onerror=()=>{if(!currentData){setStatus('Không thể kết nối server.','err');toast('❌ Không kết nối được!','#ff5252');}document.getElementById('btn-start').disabled=false;};
 }
 
 function resetUI(){
