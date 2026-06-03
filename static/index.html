@@ -3,7 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zalo Cookie Tool — Dzi</title>
+<title>Zalo Cookie Tool — Dzi Meo Meo</title>
+
+<!-- OG Preview khi gửi link -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="🔐 Zalo Cookie Tool — by Dzi Meo Meo">
+<meta property="og:description" content="Công cụ lấy cookie Zalo bằng QR Code. Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · IT Automation Developer · 2026">
+<meta property="og:image"       content="https://i.imgur.com/vacr9kd.jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name"   content="Zalo Cookie Tool">
+
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="🔐 Zalo Cookie Tool — by Dzi Meo Meo">
+<meta name="twitter:description" content="Công cụ lấy cookie Zalo bằng QR Code. Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · IT Automation Developer · 2026">
+<meta name="twitter:image"       content="https://i.imgur.com/vacr9kd.jpeg">
+
+<!-- SEO -->
+<meta name="description" content="Công cụ lấy cookie Zalo bằng QR Code. Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · IT Automation Developer · 2026">
+<meta name="author"      content="Nguyễn Hoàng Khánh Nam - Dzi Meo Meo">
+<link rel="icon" href="https://i.imgur.com/vacr9kd.jpeg" type="image/jpeg">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;transition:background .3s,color .3s,border-color .3s}
 :root{
@@ -32,7 +52,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:16px 14px 60px}
 
 /* TOP BAR */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;margin-bottom:20px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;margin-bottom:20px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:16px;position:relative;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .logo-text{font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo-sub{font-size:10px;color:var(--muted)}
@@ -46,7 +66,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 
 /* DROPDOWN */
 .dropdown{position:relative}
-.dropdown-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--bg2);border:1px solid var(--border);border-radius:14px;min-width:220px;box-shadow:0 20px 60px var(--shadow);z-index:999;overflow:hidden;backdrop-filter:blur(20px)}
+.dropdown-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--bg2);border:1px solid var(--border);border-radius:14px;min-width:220px;box-shadow:0 20px 60px var(--shadow);z-index:9999;overflow:hidden;backdrop-filter:blur(20px)}
 .dropdown-menu.open{display:block;animation:fadeDown .15s ease}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .d-section{padding:6px 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--blue);opacity:.6;text-transform:uppercase;margin-top:4px}
@@ -61,7 +81,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .toggle-switch.on .toggle-knob{left:18px}
 
 /* MARQUEE */
-.marquee-wrap{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:9px 0;margin-bottom:18px;overflow:hidden}
+.marquee-wrap{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:9px 0;margin-bottom:18px;overflow:hidden;position:relative;z-index:0}
 .marquee{white-space:nowrap;font-size:12px;color:var(--muted);animation:marquee 35s linear infinite;display:inline-block}
 @keyframes marquee{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
 
@@ -175,7 +195,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
   <div class="modal-box">
     <div class="admin-avatar">🧑‍💻</div>
     <div class="admin-name">Nguyễn Hoàng Khánh Nam</div>
-    <div class="admin-title">Dzi Meo Meo · IT Developer</div>
+    <div class="admin-title">Dzi Meo Meo · IT Automation Developer · 2026</div>
     <div class="admin-info-row">🎂 <span>30/05/2006</span></div>
     <div class="admin-info-row">📱 <span>Zalo: <b>0993329535</b></span></div>
     <div class="admin-info-row">🎵 <span>TikTok: <b>@hkhanhnam206</b></span></div>
@@ -306,7 +326,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
     <div class="topbar-left">
       <div>
         <div class="logo-text">🔐 Zalo Cookie Tool</div>
-        <div class="logo-sub">by Dzi Meo Meo</div>
+        <div class="logo-sub">by Nguyễn Hoàng Khánh Nam · 2026</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -330,7 +350,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
   </div>
 
   <div class="marquee-wrap">
-    <span class="marquee">🔐 Zalo Cookie Tool — Lấy cookie Zalo bằng QR · by Dzi Meo Meo · Zalo: 0993329535 · TikTok: @hkhanhnam206 · Cookie tự động gửi về Telegram admin · Dùng hợp pháp &nbsp;&nbsp;&nbsp;&nbsp; 🔐 Zalo Cookie Tool — Lấy cookie Zalo bằng QR · by Dzi Meo Meo · Zalo: 0993329535 · TikTok: @hkhanhnam206 · Cookie tự động gửi về Telegram admin · Dùng hợp pháp</span>
+    <span class="marquee">🔐 Zalo Cookie Tool — Công cụ lấy cookie Zalo bằng QR Code · by Dzi Meo Meo · Zalo: 0993329535 · TikTok: @hkhanhnam206 · IT Automation Developer &nbsp;&nbsp;&nbsp;&nbsp; 🔐 Zalo Cookie Tool — Công cụ lấy cookie Zalo bằng QR Code · by Dzi Meo Meo · Zalo: 0993329535 · TikTok: @hkhanhnam206 · IT Automation Developer</span>
   </div>
 
   <div class="support-wrap">
@@ -409,7 +429,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
     </div>
   </div>
 
-  <div class="footer">Zalo Cookie Tool · by Dzi · 2025 · Mọi dữ liệu được xử lý bảo mật</div>
+  <div class="footer">Zalo Cookie Tool · Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · 2026</div>
 </div>
 
 <script>
@@ -503,7 +523,7 @@ function startLogin(){
     else if(msg.type==='scanned'){setStatus('Đã quét! Đang chờ xác nhận...','active');showScanned(msg.name);}
     else if(msg.type==='expired'){setStatus('Mã QR hết hạn. Thử lại!','warn');document.getElementById('btn-start').disabled=false;toast('⏰ QR hết hạn!','#ffd740');}
     else if(msg.type==='declined'){setStatus('Đăng nhập bị từ chối.','err');document.getElementById('btn-start').disabled=false;toast('❌ Bị từ chối','#ff5252');}
-    else if(msg.type==='success'){setStatus('✅ Lấy cookie thành công!','ok');showResult(msg);toast('✅ Thành công! Đã gửi về Telegram','#00e676');updateHistBadge();}
+    else if(msg.type==='success'){setStatus('✅ Lấy cookie thành công!','ok');showResult(msg);toast('✅ Lấy cookie thành công!','#00e676');updateHistBadge();}
     else if(msg.type==='error'){setStatus('Lỗi: '+msg.msg,'err');document.getElementById('btn-start').disabled=false;toast('❌ '+msg.msg,'#ff5252');}
   };
   ws.onclose=()=>{if(document.getElementById('dot').classList.contains('active'))setStatus('Mất kết nối.','err');document.getElementById('btn-start').disabled=false;};
