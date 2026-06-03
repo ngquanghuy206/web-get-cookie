@@ -4,25 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zalo Cookie Tool — Dzi Meo Meo</title>
-
-<!-- OG Preview khi gửi link -->
-<meta property="og:type"        content="website">
-<meta property="og:title"       content="🔐 Zalo Cookie Tool — by Dzi Meo Meo">
+<meta property="og:type" content="website">
+<meta property="og:title" content="🔐 Zalo Cookie Tool — by Dzi Meo Meo">
 <meta property="og:description" content="Công cụ lấy cookie Zalo bằng QR Code. Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · IT Automation Developer · 2026">
-<meta property="og:image"       content="https://i.imgur.com/vacr9kd.jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:site_name"   content="Zalo Cookie Tool">
-
-<!-- Twitter Card -->
-<meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="🔐 Zalo Cookie Tool — by Dzi Meo Meo">
-<meta name="twitter:description" content="Công cụ lấy cookie Zalo bằng QR Code. Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · IT Automation Developer · 2026">
-<meta name="twitter:image"       content="https://i.imgur.com/vacr9kd.jpeg">
-
-<!-- SEO -->
-<meta name="description" content="Công cụ lấy cookie Zalo bằng QR Code. Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · IT Automation Developer · 2026">
-<meta name="author"      content="Nguyễn Hoàng Khánh Nam - Dzi Meo Meo">
+<meta property="og:image" content="https://i.imgur.com/vacr9kd.jpeg">
+<meta name="description" content="Công cụ lấy cookie Zalo bằng QR Code">
 <link rel="icon" href="https://i.imgur.com/vacr9kd.jpeg" type="image/jpeg">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;transition:background .3s,color .3s,border-color .3s}
@@ -40,31 +26,69 @@
   --border:rgba(0,0,0,0.1);--text:#1a1f35;--muted:rgba(26,31,53,0.5);--shadow:rgba(0,0,0,0.12);
 }
 body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
-
-/* BG ORBS */
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:float 8s ease-in-out infinite}
 .orb1{width:500px;height:500px;background:var(--blue2);top:-100px;left:-100px;animation-delay:0s}
 .orb2{width:400px;height:400px;background:var(--purple);bottom:-100px;right:-100px;animation-delay:3s}
 .orb3{width:300px;height:300px;background:var(--cyan);top:40%;left:40%;animation-delay:1.5s}
 @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.05)}}
-
 .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:16px 14px 60px}
 
-/* TOP BAR */
+/* ── AUTH SCREEN ─────────────────────────────────────── */
+#auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-card{width:100%;max-width:420px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:24px;padding:30px 28px;box-shadow:0 20px 60px var(--shadow)}
+.auth-logo{text-align:center;margin-bottom:22px}
+.auth-logo-icon{font-size:42px;margin-bottom:8px}
+.auth-logo-title{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-logo-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.auth-tabs{display:flex;gap:0;background:var(--glass2);border-radius:12px;padding:4px;margin-bottom:24px}
+.auth-tab{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;color:var(--muted);transition:all .2s}
+.auth-tab.active{background:linear-gradient(135deg,var(--blue2),var(--purple));color:#fff;box-shadow:0 4px 12px rgba(41,121,255,.35)}
+.auth-form{display:flex;flex-direction:column;gap:12px}
+.field-group{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.field-input{width:100%;padding:11px 14px;background:var(--glass2);border:1.5px solid var(--border);border-radius:11px;font-size:14px;color:var(--text);outline:none;font-family:inherit}
+.field-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,158,255,.12)}
+.field-input::placeholder{color:var(--muted)}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--blue2),var(--purple));color:#fff;box-shadow:0 4px 20px rgba(41,121,255,.3);margin-top:4px}
+.auth-btn:hover{opacity:.9;transform:translateY(-1px)}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.auth-err{background:rgba(255,82,82,.12);border:1px solid rgba(255,82,82,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);display:none}
+.remember-row{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--muted);user-select:none}
+.remember-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);background:var(--glass2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:12px}
+.remember-check.checked{background:linear-gradient(135deg,var(--blue2),var(--purple));border-color:transparent;color:#fff}
+
+/* ── CAPTCHA ─────────────────────────────────────────── */
+.captcha-box{background:var(--glass2);border:1.5px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.captcha-question{font-size:14px;font-weight:600;min-height:24px;line-height:1.5}
+.captcha-options{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.captcha-opt{padding:9px 10px;border-radius:9px;border:1.5px solid var(--border);background:var(--glass);font-size:13px;cursor:pointer;text-align:center;transition:all .15s}
+.captcha-opt:hover{border-color:var(--blue);background:var(--glass2)}
+.captcha-opt.selected{border-color:var(--green);background:rgba(0,230,118,.1);color:var(--green)}
+.captcha-opt.wrong{border-color:var(--red);background:rgba(255,82,82,.1);color:var(--red)}
+.captcha-input-row{display:flex;gap:8px;align-items:center}
+.captcha-input{flex:1;padding:9px 12px;background:var(--glass2);border:1.5px solid var(--border);border-radius:9px;font-size:14px;color:var(--text);outline:none;font-family:inherit}
+.captcha-input:focus{border-color:var(--blue)}
+.captcha-refresh{width:36px;height:36px;border:1.5px solid var(--border);border-radius:9px;background:var(--glass2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.captcha-refresh:hover{border-color:var(--blue)}
+.captcha-canvas{border-radius:8px;background:#1a2040;display:block;width:100%}
+
+/* ── TOP BAR ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;margin-bottom:20px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:16px;position:relative;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .logo-text{font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo-sub{font-size:10px;color:var(--muted)}
 .topbar-right{display:flex;gap:8px;align-items:center}
 .clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:64px}
+.user-badge{font-size:12px;font-weight:700;padding:4px 10px;background:linear-gradient(135deg,rgba(79,158,255,.2),rgba(124,77,255,.2));border:1px solid rgba(79,158,255,.3);border-radius:20px;color:var(--blue)}
+.admin-badge{background:linear-gradient(135deg,rgba(255,215,64,.2),rgba(255,145,0,.2));border-color:rgba(255,215,64,.4);color:var(--yellow)}
 
-/* ICON BUTTONS */
+/* ── ICON BUTTONS ────────────────────────────────────── */
 .icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--glass2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text);position:relative}
 .icon-btn:hover{border-color:var(--blue)}
 .badge{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 
-/* DROPDOWN */
+/* ── DROPDOWN ────────────────────────────────────────── */
 .dropdown{position:relative}
 .dropdown-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--bg2);border:1px solid var(--border);border-radius:14px;min-width:220px;box-shadow:0 20px 60px var(--shadow);z-index:9999;overflow:hidden;backdrop-filter:blur(20px)}
 .dropdown-menu.open{display:block;animation:fadeDown .15s ease}
@@ -80,20 +104,20 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .toggle-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s}
 .toggle-switch.on .toggle-knob{left:18px}
 
-/* MARQUEE */
-.marquee-wrap{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:9px 0;margin-bottom:18px;overflow:hidden;position:relative;z-index:0}
+/* ── MARQUEE ─────────────────────────────────────────── */
+.marquee-wrap{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px;padding:9px 0;margin-bottom:18px;overflow:hidden}
 .marquee{white-space:nowrap;font-size:12px;color:var(--muted);animation:marquee 35s linear infinite;display:inline-block}
 @keyframes marquee{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
 
-/* SUPPORT BUTTONS */
+/* ── SUPPORT ─────────────────────────────────────────── */
 .support-wrap{display:flex;gap:10px;margin-bottom:18px}
 .support-btn{flex:1;padding:10px;border-radius:12px;background:var(--glass);border:1px solid var(--border);font-size:12px;font-weight:700;cursor:pointer;text-align:center;color:var(--text)}
 .support-btn:hover{border-color:var(--blue);background:var(--glass2)}
 
-/* MAIN CARD */
+/* ── CARD ────────────────────────────────────────────── */
 .card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 8px 40px var(--shadow)}
 
-/* STATUS */
+/* ── STATUS ──────────────────────────────────────────── */
 .status-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--glass2);border:1px solid var(--border);margin-bottom:22px;font-size:13px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
 .dot.active{background:var(--blue);box-shadow:0 0 8px var(--blue);animation:pulse 1.2s infinite}
@@ -101,7 +125,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .dot.err{background:var(--red)}.dot.warn{background:var(--yellow)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* QR */
+/* ── QR AREA ─────────────────────────────────────────── */
 .qr-area{display:flex;flex-direction:column;align-items:center;gap:18px;min-height:260px;justify-content:center}
 .qr-frame{width:210px;height:210px;border-radius:20px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;font-size:13px;color:var(--muted);position:relative}
 .qr-frame::before,.qr-frame::after{content:'';position:absolute;width:22px;height:22px;border-color:var(--blue);border-style:solid}
@@ -115,7 +139,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* RESULT */
+/* ── RESULT ──────────────────────────────────────────── */
 .result-wrap{display:none;flex-direction:column;gap:14px;margin-top:4px}
 .acc-card{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(79,158,255,.1),rgba(0,229,255,.05));border:1px solid rgba(79,158,255,.25)}
 .avatar-circle{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(41,121,255,.4)}
@@ -124,23 +148,22 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .info-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--blue);opacity:.7;text-transform:uppercase;margin-bottom:4px}
 .info-value{font-size:11px;font-family:monospace;color:#7dd3fc;word-break:break-all;line-height:1.6;max-height:90px;overflow-y:auto}
 .info-value::-webkit-scrollbar{width:3px}.info-value::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-
-/* TABS */
 .tabs{display:flex;gap:6px;margin-bottom:10px}
 .tab{flex:1;padding:7px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--glass);color:var(--muted);text-align:center}
 .tab.active{background:linear-gradient(135deg,var(--blue2),var(--purple));border-color:transparent;color:#fff}
 .tab-panel{display:none}.tab-panel.active{display:block}
 
-/* BUTTONS */
+/* ── BUTTONS ─────────────────────────────────────────── */
 .btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
 .btn{flex:1;min-width:110px;padding:11px 14px;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
 .btn:hover{opacity:.85;transform:translateY(-1px)}.btn:active{transform:translateY(0)}
 .btn-primary{background:linear-gradient(135deg,var(--blue2),var(--purple));color:#fff;box-shadow:0 4px 20px rgba(41,121,255,.3)}
 .btn-green{background:linear-gradient(135deg,#00c853,#00a040);color:#fff}
 .btn-outline{background:var(--glass2);border:1px solid var(--border);color:var(--muted)}
+.btn-danger{background:linear-gradient(135deg,#ff5252,#c62828);color:#fff}
 .btn.copied{background:linear-gradient(135deg,var(--green),#00a040)!important;color:#fff}
 
-/* ===== MODALS ===== */
+/* ── MODALS ──────────────────────────────────────────── */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
 .modal-overlay.open{display:flex}
 .modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:520px;box-shadow:0 30px 80px var(--shadow);margin:auto;animation:popIn .2s ease}
@@ -148,13 +171,13 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .modal-title{font-size:18px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:10px}
 .close-btn{width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--blue2),var(--purple));color:#fff;font-weight:700;cursor:pointer;margin-top:16px;font-size:14px}
 
-/* ADMIN MODAL */
+/* ── ADMIN MODAL ─────────────────────────────────────── */
 .admin-avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--blue2),var(--purple));display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 8px 30px rgba(79,158,255,.4)}
 .admin-name{font-size:18px;font-weight:800;text-align:center;margin-bottom:3px}
 .admin-title{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px}
 .admin-info-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--glass2);margin-bottom:8px;font-size:13px}
 
-/* HISTORY */
+/* ── HISTORY ─────────────────────────────────────────── */
 .hist-item{padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--border);margin-bottom:10px;cursor:pointer}
 .hist-item:hover{border-color:var(--blue)}
 .hist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
@@ -170,17 +193,31 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 .page-btn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--glass);cursor:pointer;font-size:12px;color:var(--text)}
 .page-btn.active{background:var(--blue2);border-color:transparent;color:#fff}
 
-/* GUIDE */
+/* ── GUIDE ───────────────────────────────────────────── */
 .guide-step{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start}
 .step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;margin-top:2px}
 .step-content h4{font-size:14px;font-weight:700;margin-bottom:4px}
 .step-content p{font-size:13px;color:var(--muted);line-height:1.6}
 .step-content .tip{margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(255,215,64,.08);border-left:3px solid var(--yellow);font-size:12px;color:var(--yellow)}
-.step-content .warn-tip{margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(255,82,82,.08);border-left:3px solid var(--red);font-size:12px;color:var(--red)}
 .guide-divider{height:1px;background:var(--border);margin:16px 0}
 .guide-section-title{font-size:13px;font-weight:700;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 
-/* FOOTER */
+/* ── USER MANAGEMENT ─────────────────────────────────── */
+.user-table{width:100%;border-collapse:collapse;font-size:12px}
+.user-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue);opacity:.7;border-bottom:1px solid var(--border)}
+.user-table td{padding:10px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+.user-table tr:last-child td{border-bottom:none}
+.u-active{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.u-active.yes{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3)}
+.u-active.no{background:rgba(255,82,82,.12);color:var(--red);border:1px solid rgba(255,82,82,.3)}
+.u-action{padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--glass2);font-size:11px;font-weight:700;cursor:pointer;color:var(--text);margin-right:4px}
+.u-action:hover{border-color:var(--blue)}
+.u-action.del{border-color:rgba(255,82,82,.3);color:var(--red)}
+.u-action.del:hover{background:rgba(255,82,82,.12)}
+.pw-reveal{font-family:monospace;font-size:10px;color:var(--muted);word-break:break-all;max-width:120px;cursor:pointer}
+.pw-reveal:hover{color:var(--text)}
+
+/* ── FOOTER ──────────────────────────────────────────── */
 .footer{text-align:center;font-size:11px;color:var(--muted);margin-top:28px;opacity:.5}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;color:#fff;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);pointer-events:none;max-width:90vw;text-align:center}
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -188,197 +225,200 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 </style>
 </head>
 <body>
-<!-- AUDIO -->
 <audio id="bg-music" loop>
-  <source src="https://cdn.pixabay.com/audio/2024/01/10/audio_8ea3f8e74a.mp3" type="audio/mpeg">
+  <source src="/static/nhac.mp3" type="audio/mpeg">
 </audio>
-
 <div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
-<!-- ===== ADMIN MODAL ===== -->
+<!-- ═══════════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🍪</div>
+      <div class="auth-logo-title">Zalo Cookie Tool</div>
+      <div class="auth-logo-sub">Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · 2026</div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">🔐 Đăng nhập</div>
+      <div class="auth-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">📝 Đăng ký</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="auth-login-form" class="auth-form">
+      <div class="field-group">
+        <div class="field-label">Tên đăng nhập</div>
+        <input class="field-input" id="login-user" type="text" placeholder="Nhập tên đăng nhập" autocomplete="username">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Mật khẩu</div>
+        <input class="field-input" id="login-pass" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password">
+      </div>
+      <label class="remember-row" id="remember-row">
+        <div class="remember-check" id="remember-check" onclick="toggleRemember()"></div>
+        <span>Ghi nhớ đăng nhập</span>
+      </label>
+      <div class="auth-err" id="login-err"></div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">🔐 Đăng nhập</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="auth-register-form" class="auth-form" style="display:none">
+      <div class="field-group">
+        <div class="field-label">Tên đăng nhập</div>
+        <input class="field-input" id="reg-user" type="text" placeholder="Tối thiểu 4 ký tự" autocomplete="username">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Mật khẩu</div>
+        <input class="field-input" id="reg-pass" type="password" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Gmail</div>
+        <input class="field-input" id="reg-email" type="email" placeholder="example@gmail.com">
+      </div>
+      <!-- CAPTCHA -->
+      <div class="field-group">
+        <div class="field-label">Xác minh bảo mật (CAPTCHA)</div>
+        <div class="captcha-box" id="captcha-box">
+          <div class="captcha-question" id="captcha-q">Đang tải...</div>
+          <div id="captcha-content"></div>
+        </div>
+      </div>
+      <div class="auth-err" id="reg-err"></div>
+      <button class="auth-btn" id="reg-btn" onclick="doRegister()">📝 Đăng ký</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ADMIN MODAL
+════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="admin-modal" onclick="if(event.target===this)closeModal('admin-modal')">
   <div class="modal-box">
-    <div class="admin-avatar">🧑‍💻</div>
-    <div class="admin-name">Nguyễn Hoàng Khánh Nam</div>
-    <div class="admin-title">Dzi Meo Meo · IT Automation Developer · 2026</div>
-    <div class="admin-info-row">🎂 <span>30/05/2006</span></div>
-    <div class="admin-info-row">📱 <span>Zalo: <b>0993329535</b></span></div>
-    <div class="admin-info-row">🎵 <span>TikTok: <b>@hkhanhnam206</b></span></div>
-    <div class="admin-info-row">💼 <span>Lĩnh vực: <b>IT / Automation / Bot Dev</b></span></div>
-    <div class="admin-info-row">✨ <span>Admin: <b>Dzi Meo Meo</b></span></div>
-    <button class="close-btn" onclick="closeModal('admin-modal')">✕ Đóng</button>
+    <div class="modal-title">🔐 Thông tin Admin</div>
+    <div class="admin-avatar">👑</div>
+    <div class="admin-name" id="admin-display-name">Khánh Nam (Dzi)</div>
+    <div class="admin-title">IT Automation Developer · 2026</div>
+    <div class="admin-info-row">📱 TikTok: <b>@hkhanhnam206</b></div>
+    <div class="admin-info-row">💬 Zalo: <b>0987654321</b></div>
+    <div class="admin-info-row">📧 Email: <b>knammelbel206@gmail.com</b></div>
+    <button class="close-btn" onclick="closeModal('admin-modal')">Đóng</button>
   </div>
 </div>
 
-<!-- ===== HISTORY MODAL ===== -->
+<!-- GUIDE MODAL -->
+<div class="modal-overlay" id="guide-modal" onclick="if(event.target===this)closeModal('guide-modal')">
+  <div class="modal-box">
+    <div class="modal-title">📚 Hướng dẫn lấy cookie Zalo</div>
+    <div class="guide-section-title">🚀 Các bước thực hiện</div>
+    <div class="guide-step"><div class="step-num">1</div><div class="step-content"><h4>Nhấn "Bắt đầu"</h4><p>Hệ thống sẽ tạo mã QR đăng nhập Zalo. Chờ khoảng 5-10 giây.</p></div></div>
+    <div class="guide-step"><div class="step-num">2</div><div class="step-content"><h4>Quét mã QR bằng Zalo</h4><p>Mở app Zalo → Nhấn icon QR ở góc trên → Quét mã.</p><div class="tip">⚡ Mã QR có hiệu lực 2 phút. Nếu hết hạn, nhấn làm mới.</div></div></div>
+    <div class="guide-step"><div class="step-num">3</div><div class="step-content"><h4>Xác nhận đăng nhập</h4><p>Trên điện thoại sẽ hiện thông báo xác nhận. Nhấn <b>"Xác nhận"</b>.</p></div></div>
+    <div class="guide-step"><div class="step-num">4</div><div class="step-content"><h4>Lấy cookie</h4><p>Cookie sẽ hiển thị tự động. Copy hoặc tải về file .txt.</p></div></div>
+    <div class="guide-divider"></div>
+    <div class="guide-section-title">⚠️ Lưu ý quan trọng</div>
+    <div class="guide-step"><div class="step-num">!</div><div class="step-content"><h4>Bảo mật tài khoản</h4><p>Cookie Zalo như mật khẩu. Không chia sẻ với người khác!</p><div class="tip" style="border-color:var(--red);color:var(--red);background:rgba(255,82,82,.08)">🔴 Cookie có thể bị thu hồi nếu đăng nhập nhiều nơi cùng lúc.</div></div></div>
+    <button class="close-btn" onclick="closeModal('guide-modal')">Đã hiểu</button>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
 <div class="modal-overlay" id="history-modal" onclick="if(event.target===this)closeModal('history-modal')">
   <div class="modal-box" style="max-width:600px">
-    <div class="modal-title">📋 Lịch sử quét <span id="hist-count" style="font-size:13px;color:var(--muted);font-weight:400"></span></div>
+    <div class="modal-title">📋 Lịch sử lấy cookie <span id="hist-count" style="font-size:13px;font-weight:400;color:var(--muted)"></span></div>
     <div id="hist-list"></div>
     <div class="page-nav" id="hist-pages"></div>
-    <button class="close-btn" onclick="closeModal('history-modal')">✕ Đóng</button>
+    <button class="close-btn" onclick="closeModal('history-modal')">Đóng</button>
   </div>
 </div>
 
-<!-- ===== HISTORY DETAIL MODAL ===== -->
+<!-- HIST DETAIL MODAL -->
 <div class="modal-overlay" id="hist-detail-modal" onclick="if(event.target===this)closeModal('hist-detail-modal')">
-  <div class="modal-box" style="max-width:560px">
-    <div class="modal-title">👤 Chi tiết tài khoản</div>
+  <div class="modal-box">
+    <div class="modal-title">🔍 Chi tiết cookie</div>
     <div id="hist-detail-content"></div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-green" style="flex:1" onclick="downloadHistDetail()">⬇️ Tải file .txt</button>
-      <button class="btn btn-outline" style="flex:1" onclick="closeModal('hist-detail-modal')">✕ Đóng</button>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-green" onclick="copyHistDetailCookie(this)">📋 Copy Cookie</button>
+      <button class="btn btn-primary" onclick="downloadHistDetail()">⬇️ Tải .txt</button>
     </div>
+    <button class="close-btn" onclick="closeModal('hist-detail-modal')">Đóng</button>
   </div>
 </div>
 
-<!-- ===== GUIDE MODAL ===== -->
-<div class="modal-overlay" id="guide-modal" onclick="if(event.target===this)closeModal('guide-modal')">
-  <div class="modal-box" style="max-width:580px">
-    <div class="modal-title">📖 Hướng dẫn lấy & bảo quản cookie</div>
-
-    <div class="guide-section-title">🚀 Cách lấy cookie Zalo</div>
-
-    <div class="guide-step">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <h4>Chuẩn bị 2 thiết bị</h4>
-        <p>Cần <b>2 điện thoại</b> (hoặc 1 điện thoại + 1 máy tính).<br>
-        • <b>Thiết bị A</b>: điện thoại đang đăng nhập tài khoản Zalo muốn lấy cookie.<br>
-        • <b>Thiết bị B</b>: điện thoại/máy tính dùng để mở web này và quét QR.</p>
-        <div class="tip">💡 Có thể dùng cùng 1 điện thoại nhưng cần 2 tài khoản Zalo khác nhau hoặc chế độ phân chia màn hình.</div>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <h4>Mở web này trên Thiết bị B</h4>
-        <p>Truy cập trang web này trên Thiết bị B (thiết bị không cần đăng nhập Zalo).</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <h4>Bấm "Bắt đầu" và chờ QR hiện</h4>
-        <p>Bấm nút <b>🚀 Bắt đầu</b>, chờ mã QR xuất hiện trên màn hình (khoảng 5–10 giây).</p>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <h4>Dùng Thiết bị A quét QR</h4>
-        <p>Trên <b>Thiết bị A</b> (điện thoại có Zalo muốn lấy cookie):<br>
-        1. Mở app <b>Zalo</b><br>
-        2. Bấm biểu tượng <b>QR</b> hoặc vào <b>Cài đặt → Quét mã QR</b><br>
-        3. Hướng camera vào mã QR trên Thiết bị B<br>
-        4. Bấm <b>Xác nhận đăng nhập</b> trên Thiết bị A</p>
-        <div class="tip">💡 Mã QR có hiệu lực khoảng 2 phút. Nếu hết hạn bấm "Làm mới" để tạo QR mới.</div>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <div class="step-num">5</div>
-      <div class="step-content">
-        <h4>Cookie được lấy tự động</h4>
-        <p>Sau khi xác nhận, web tự động lấy cookie và hiển thị thông tin tài khoản. Cookie cũng được gửi tự động về Telegram admin để lưu trữ.</p>
-      </div>
-    </div>
-
-    <div class="guide-divider"></div>
-    <div class="guide-section-title">🛡️ Cách bảo quản cookie không bị die</div>
-
-    <div class="guide-step">
-      <div class="step-num">⚠️</div>
-      <div class="step-content">
-        <h4>Những việc LÀM cookie die ngay</h4>
-        <div class="warn-tip">❌ Đăng xuất Zalo trên điện thoại gốc<br>❌ Đổi mật khẩu Zalo<br>❌ Bật xác thực 2 lớp sau khi lấy cookie<br>❌ Zalo phát hiện đăng nhập bất thường và buộc đăng xuất</div>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <div class="step-num">✅</div>
-      <div class="step-content">
-        <h4>Cách giữ cookie sống lâu</h4>
-        <p>• Không đăng xuất Zalo trên điện thoại gốc<br>
-        • Lưu cookie ở nơi an toàn, không chia sẻ công khai<br>
-        • Dùng cookie trong vòng 24h sau khi lấy<br>
-        • Tránh đổi mật khẩu hoặc email liên kết<br>
-        • Không dùng cookie từ 2 IP quá khác nhau cùng lúc</p>
-        <div class="tip">💡 Cookie Zalo thường sống từ <b>7–30 ngày</b> nếu không có hành động đăng xuất. Để lâu hơn thì thỉnh thoảng dùng cookie đó gọi API 1 lần để refresh session.</div>
-      </div>
-    </div>
-
-    <div class="guide-step">
-      <div class="step-num">💾</div>
-      <div class="step-content">
-        <h4>Lưu trữ cookie đúng cách</h4>
-        <p>• Tải file <b>.txt</b> về lưu vào thư mục an toàn<br>
-        • Có thể import vào trình duyệt bằng extension <b>EditThisCookie</b><br>
-        • Dùng cho các tool Zalo API thì paste vào trường "cookie"</p>
-      </div>
-    </div>
-
-    <button class="close-btn" onclick="closeModal('guide-modal')">✕ Đóng</button>
+<!-- ADMIN USER MANAGEMENT MODAL -->
+<div class="modal-overlay" id="mgmt-modal" onclick="if(event.target===this)closeModal('mgmt-modal')">
+  <div class="modal-box" style="max-width:700px">
+    <div class="modal-title">👑 Quản lý tài khoản <span id="mgmt-count" style="font-size:13px;font-weight:400;color:var(--muted)"></span></div>
+    <div id="mgmt-list"></div>
+    <div class="page-nav" id="mgmt-pages"></div>
+    <button class="close-btn" onclick="closeModal('mgmt-modal')">Đóng</button>
   </div>
 </div>
 
-<!-- ===== MAIN ===== -->
+<!-- ═══════════════════════════════════════════════════════
+     MAIN APP (hidden until login)
+════════════════════════════════════════════════════════ -->
+<div id="app-screen" style="display:none">
 <div class="wrap">
+
+  <!-- TOP BAR -->
   <div class="topbar">
     <div class="topbar-left">
       <div>
-        <div class="logo-text">🔐 Zalo Cookie Tool</div>
-        <div class="logo-sub">by Nguyễn Hoàng Khánh Nam · 2026</div>
+        <div class="logo-text">🍪 Zalo Cookie Tool</div>
+        <div class="logo-sub">by Dzi Meo Meo · IT Automation</div>
       </div>
     </div>
     <div class="topbar-right">
       <div class="clock" id="clock">--:--:--</div>
-      <div class="icon-btn" onclick="openHistory()" title="Lịch sử">📋<span class="badge" id="hist-badge" style="display:none">0</span></div>
+      <div class="user-badge" id="user-badge-el">👤 ...</div>
       <div class="dropdown">
         <div class="icon-btn" onclick="toggleMenu()" title="Menu">☰</div>
         <div class="dropdown-menu" id="main-menu">
-          <div class="d-section">Âm thanh</div>
+          <div class="d-section">Tài khoản</div>
+          <div class="d-item" onclick="doLogout()">🚪 Đăng xuất</div>
+          <div class="d-section">Tính năng</div>
+          <div class="d-item" onclick="openHistory();closeMenu()">📋 Lịch sử <span id="hist-badge" class="badge" style="position:static;margin-left:auto;display:none"></span></div>
+          <div class="d-item" onclick="openModal('admin-modal');closeMenu()">🔐 Thông tin Admin</div>
+          <div class="d-item" onclick="openModal('guide-modal');closeMenu()">📚 Hướng dẫn</div>
+          <div class="d-item" id="mgmt-menu-item" style="display:none" onclick="openMgmt();closeMenu()">👑 Quản lý tài khoản</div>
+          <div class="d-section">Cài đặt</div>
+          <div class="d-toggle" onclick="toggleTheme()">
+            <span><span id="theme-label">🌙 Chế độ tối</span></span>
+            <div class="toggle-switch on" id="theme-toggle"><div class="toggle-knob"></div></div>
+          </div>
           <div class="d-toggle" onclick="toggleMusic()">
-            <span id="music-label">🎵 Nhạc nền</span>
+            <span>🎵 Nhạc nền</span>
             <div class="toggle-switch" id="music-toggle"><div class="toggle-knob"></div></div>
           </div>
           <div class="d-toggle" onclick="toggleSfx()">
-            <span id="sfx-label">🔔 Âm thanh nhấn</span>
-            <div class="toggle-switch" id="sfx-toggle"><div class="toggle-knob"></div></div>
+            <span>🔊 Âm thanh</span>
+            <div class="toggle-switch on" id="sfx-toggle"><div class="toggle-knob"></div></div>
           </div>
-          <div class="d-section">Giao diện</div>
-          <div class="d-toggle" onclick="toggleTheme()">
-            <span id="theme-label">🌙 Chế độ tối</span>
-            <div class="toggle-switch on" id="theme-toggle"><div class="toggle-knob"></div></div>
-          </div>
-          <div class="d-section">Tính năng</div>
-          <div class="d-item" onclick="openHistory();closeMenu()">📋 Lịch sử quét cookie</div>
-          <div class="d-item" onclick="openModal('guide-modal');closeMenu()">📖 Hướng dẫn lấy cookie</div>
-          <div class="d-item" onclick="openModal('admin-modal');closeMenu()">👤 Thông tin Admin</div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- MARQUEE -->
   <div class="marquee-wrap">
-    <span class="marquee">🔐 Zalo Cookie Tool — Công cụ lấy cookie Zalo bằng QR Code · by Dzi Meo Meo · Zalo: 0993329535 · TikTok: @hkhanhnam206 · IT Automation Developer &nbsp;&nbsp;&nbsp;&nbsp; 🔐 Zalo Cookie Tool — Công cụ lấy cookie Zalo bằng QR Code · by Dzi Meo Meo · Zalo: 0993329535 · TikTok: @hkhanhnam206 · IT Automation Developer</span>
+    <div class="marquee">🍪 Zalo Cookie Tool · Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi Meo Meo) · IT Automation Developer · Mọi thông tin đều được mã hóa và bảo mật · Không chia sẻ cookie với người khác · 2026</div>
   </div>
 
+  <!-- SUPPORT BUTTONS -->
   <div class="support-wrap">
     <div class="support-btn" onclick="openModal('admin-modal')">👤 Thông tin Admin</div>
     <div class="support-btn" onclick="openModal('guide-modal')">📖 Hướng dẫn lấy cookie</div>
   </div>
 
+  <!-- MAIN CARD -->
   <div class="card">
     <div class="status-row">
       <div class="dot" id="dot"></div>
       <span id="status-text">Nhấn Bắt đầu để tạo mã QR Zalo</span>
     </div>
 
-    <!-- QR AREA -->
     <div class="qr-area" id="qr-area">
       <div class="qr-frame" id="qr-frame">
         <span id="qr-icon">📱</span>
@@ -395,9 +435,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
       <div class="qr-hint" id="qr-hint"></div>
     </div>
 
-    <!-- RESULT -->
     <div class="result-wrap" id="result-wrap">
-      <!-- Hàng 1: Thông tin tài khoản -->
       <div class="acc-card">
         <div class="avatar-circle">👤</div>
         <div>
@@ -406,12 +444,10 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
           <div class="acc-sub" id="res-time" style="margin-top:2px;font-size:11px">🕐 —</div>
         </div>
       </div>
-      <!-- Hàng 2: IMEI -->
       <div class="info-row">
         <div class="info-label">📡 IMEI</div>
         <div class="info-value" id="res-imei">—</div>
       </div>
-      <!-- Hàng 3: Cookie -->
       <div>
         <div class="tabs">
           <div class="tab active" onclick="switchTab('str')">🍪 Cookie String</div>
@@ -445,40 +481,383 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 
   <div class="footer">Zalo Cookie Tool · Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · 2026</div>
 </div>
+</div><!-- /#app-screen -->
 
 <script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let rememberMe    = localStorage.getItem('zct_remember') === '1';
+let SESSION_TOKEN = localStorage.getItem('zct_token') || sessionStorage.getItem('zct_token') || '';
+let CURRENT_USER  = localStorage.getItem('zct_user')  || sessionStorage.getItem('zct_user')  || '';
+let IS_ADMIN      = (localStorage.getItem('zct_admin') || sessionStorage.getItem('zct_admin')) === '1';
 let ws = null, currentData = null, viewingHistItem = null;
 const WS_PROTO = location.protocol==='https:'?'wss:':'ws:';
 const WS_BASE  = WS_PROTO+'//'+location.host+'/ws';
 
-// CLOCK
+// ═══════════════════════════════════════════════════════
+//  CAPTCHA ENGINE  (10 loại ngẫu nhiên)
+// ═══════════════════════════════════════════════════════
+let captchaAnswer = null;
+let captchaType   = null;
+
+const CAPTCHA_TYPES = [
+  'math_add','math_sub','math_mul','pick_animal',
+  'pick_fruit','pick_color','drag_order','canvas_text',
+  'odd_one_out','emoji_count'
+];
+
+function randomInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+function generateCaptcha(){
+  captchaAnswer = null;
+  const type = CAPTCHA_TYPES[randomInt(0, CAPTCHA_TYPES.length-1)];
+  captchaType  = type;
+  const box    = document.getElementById('captcha-content');
+  const qEl    = document.getElementById('captcha-q');
+
+  if(type==='math_add'||type==='math_sub'||type==='math_mul'){
+    const a=randomInt(1,20), b=randomInt(1,20);
+    const op = type==='math_add'?'+':type==='math_sub'?'-':'×';
+    const ans = type==='math_add'?a+b:type==='math_sub'?a-b:a*b;
+    captchaAnswer = String(ans);
+    qEl.textContent = `🔢 Tính: ${a} ${op} ${b} = ?`;
+    box.innerHTML = `<div class="captcha-input-row">
+      <input class="captcha-input" id="cap-input" type="number" placeholder="Nhập kết quả">
+      <button class="captcha-refresh" onclick="generateCaptcha()" title="Đổi câu hỏi">🔄</button>
+    </div>`;
+    return;
+  }
+
+  if(type==='canvas_text'){
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for(let i=0;i<5;i++) code += chars[randomInt(0,chars.length-1)];
+    captchaAnswer = code;
+    qEl.textContent = '🖼 Nhập chính xác mã trong ảnh:';
+    box.innerHTML = `<div class="captcha-input-row">
+      <canvas id="cap-canvas" class="captcha-canvas" width="220" height="60"></canvas>
+      <button class="captcha-refresh" onclick="generateCaptcha()" title="Tải lại">🔄</button>
+    </div>
+    <div class="captcha-input-row" style="margin-top:8px">
+      <input class="captcha-input" id="cap-input" type="text" maxlength="5" placeholder="5 ký tự" style="text-transform:uppercase">
+    </div>`;
+    setTimeout(()=>{
+      const canvas=document.getElementById('cap-canvas');
+      if(!canvas) return;
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#1a2040';
+      ctx.fillRect(0,0,220,60);
+      // Noise lines
+      for(let i=0;i<6;i++){
+        ctx.strokeStyle=`hsl(${randomInt(0,360)},50%,50%)`;
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(randomInt(0,220),randomInt(0,60));
+        ctx.lineTo(randomInt(0,220),randomInt(0,60));
+        ctx.stroke();
+      }
+      // Dots
+      for(let i=0;i<30;i++){
+        ctx.fillStyle=`rgba(${randomInt(100,255)},${randomInt(100,255)},${randomInt(100,255)},0.5)`;
+        ctx.fillRect(randomInt(0,220),randomInt(0,60),2,2);
+      }
+      // Text
+      const colors=['#4f9eff','#00e5ff','#ffd740','#00e676','#ff9100'];
+      for(let i=0;i<code.length;i++){
+        ctx.font=`bold ${randomInt(26,32)}px monospace`;
+        ctx.fillStyle=colors[i%colors.length];
+        ctx.save();
+        ctx.translate(20+i*38, randomInt(38,46));
+        ctx.rotate((randomInt(-15,15)*Math.PI)/180);
+        ctx.fillText(code[i],0,0);
+        ctx.restore();
+      }
+    },50);
+    return;
+  }
+
+  if(type==='pick_animal'){
+    const animals = [['🐶','Chó'],['🐱','Mèo'],['🐭','Chuột'],['🐰','Thỏ'],['🦊','Cáo'],['🐼','Gấu trúc'],['🐯','Hổ'],['🦁','Sư tử'],['🐸','Ếch'],['🐧','Chim cánh cụt']];
+    const pick = animals[randomInt(0,animals.length-1)];
+    captchaAnswer = pick[0];
+    qEl.textContent = `🐾 Chọn con vật: ${pick[1]}`;
+    const shuffled = [...animals].sort(()=>Math.random()-.5).slice(0,6);
+    if(!shuffled.find(a=>a[0]===pick[0])) shuffled[0]=pick;
+    shuffled.sort(()=>Math.random()-.5);
+    box.innerHTML = `<div class="captcha-options">
+      ${shuffled.map(a=>`<div class="captcha-opt" onclick="selectOpt(this,'${a[0]}')">${a[0]} ${a[1]}</div>`).join('')}
+    </div><button class="captcha-refresh" style="margin-top:8px;width:100%" onclick="generateCaptcha()">🔄 Đổi câu hỏi</button>`;
+    return;
+  }
+
+  if(type==='pick_fruit'){
+    const fruits=[['🍎','Táo'],['🍌','Chuối'],['🍇','Nho'],['🍊','Cam'],['🍓','Dâu'],['🍋','Chanh'],['🥝','Kiwi'],['🍑','Đào'],['🍉','Dưa hấu'],['🍍','Dứa']];
+    const pick = fruits[randomInt(0,fruits.length-1)];
+    captchaAnswer = pick[0];
+    qEl.textContent = `🍒 Chọn loại quả: ${pick[1]}`;
+    const shuffled = [...fruits].sort(()=>Math.random()-.5).slice(0,6);
+    if(!shuffled.find(a=>a[0]===pick[0])) shuffled[0]=pick;
+    shuffled.sort(()=>Math.random()-.5);
+    box.innerHTML = `<div class="captcha-options">
+      ${shuffled.map(a=>`<div class="captcha-opt" onclick="selectOpt(this,'${a[0]}')">${a[0]} ${a[1]}</div>`).join('')}
+    </div><button class="captcha-refresh" style="margin-top:8px;width:100%" onclick="generateCaptcha()">🔄 Đổi câu hỏi</button>`;
+    return;
+  }
+
+  if(type==='pick_color'){
+    const colors=[['🔴','Đỏ'],['🔵','Xanh dương'],['🟢','Xanh lá'],['🟡','Vàng'],['🟠','Cam'],['🟣','Tím'],['⚫','Đen'],['⚪','Trắng']];
+    const pick = colors[randomInt(0,colors.length-1)];
+    captchaAnswer = pick[0];
+    qEl.textContent = `🎨 Chọn màu: ${pick[1]}`;
+    const shuffled = [...colors].sort(()=>Math.random()-.5).slice(0,4);
+    if(!shuffled.find(a=>a[0]===pick[0])) shuffled[0]=pick;
+    shuffled.sort(()=>Math.random()-.5);
+    box.innerHTML = `<div class="captcha-options">
+      ${shuffled.map(a=>`<div class="captcha-opt" onclick="selectOpt(this,'${a[0]}')">${a[0]} ${a[1]}</div>`).join('')}
+    </div><button class="captcha-refresh" style="margin-top:8px;width:100%" onclick="generateCaptcha()">🔄 Đổi câu hỏi</button>`;
+    return;
+  }
+
+  if(type==='odd_one_out'){
+    const groups = [
+      {q:'Tìm đồ vật KHÔNG phải phương tiện giao thông',correct:'🍎',opts:['🚗','🏍','🍎','✈️','🚢','🚲']},
+      {q:'Tìm thứ KHÔNG phải con số',correct:'A',opts:['1','5','A','3','7','9']},
+      {q:'Tìm thứ KHÔNG phải đồ ăn',correct:'📱',opts:['🍕','🍔','📱','🍣','🍜','🍦']},
+      {q:'Tìm thứ KHÔNG phải màu sắc',correct:'🔔',opts:['🔴','🔵','🟢','🔔','🟡','🟣']},
+      {q:'Tìm thứ KHÔNG phải loài hoa',correct:'🐟',opts:['🌹','🌸','🐟','🌻','🌺','🌼']},
+    ];
+    const g = groups[randomInt(0,groups.length-1)];
+    captchaAnswer = g.correct;
+    qEl.textContent = '🔍 '+g.q;
+    const opts = [...g.opts].sort(()=>Math.random()-.5);
+    box.innerHTML = `<div class="captcha-options">
+      ${opts.map(o=>`<div class="captcha-opt" onclick="selectOpt(this,'${o}')">${o}</div>`).join('')}
+    </div><button class="captcha-refresh" style="margin-top:8px;width:100%" onclick="generateCaptcha()">🔄 Đổi câu hỏi</button>`;
+    return;
+  }
+
+  if(type==='emoji_count'){
+    const emojis=['⭐','❤️','🔥','💎','🎯'];
+    const em = emojis[randomInt(0,emojis.length-1)];
+    const count = randomInt(2,8);
+    captchaAnswer = String(count);
+    qEl.textContent = `🔢 Đếm số ${em} trong hình:`;
+    const noises = ['🌀','💫','✨','🎪','🎭','🎨'];
+    let items = Array(count).fill(em);
+    const extra = randomInt(3,6);
+    for(let i=0;i<extra;i++) items.push(noises[randomInt(0,noises.length-1)]);
+    items.sort(()=>Math.random()-.5);
+    box.innerHTML = `<div style="font-size:22px;letter-spacing:4px;text-align:center;padding:10px 0;line-height:1.8">${items.join(' ')}</div>
+    <div class="captcha-input-row">
+      <input class="captcha-input" id="cap-input" type="number" placeholder="Nhập số lượng" min="1">
+      <button class="captcha-refresh" onclick="generateCaptcha()">🔄</button>
+    </div>`;
+    return;
+  }
+
+  if(type==='drag_order'){
+    const seqs=[
+      {q:'Sắp xếp theo thứ tự từ nhỏ đến lớn',items:['3','1','4','2'],answer:'1234'},
+      {q:'Sắp xếp theo thứ tự từ nhỏ đến lớn',items:['5','2','8','1'],answer:'1258'},
+      {q:'Chọn bước tiếp theo: 2, 4, 6, ?',items:['7','8','9','10'],answer:'8'},
+      {q:'Chọn bước tiếp theo: 1, 3, 5, ?',items:['6','7','8','9'],answer:'7'},
+      {q:'Chọn bước tiếp theo: 10, 20, 30, ?',items:['35','40','45','50'],answer:'40'},
+    ];
+    const seq = seqs[randomInt(0,seqs.length-1)];
+    captchaAnswer = seq.answer;
+    qEl.textContent = '📊 '+seq.q;
+    const opts = [...seq.items].sort(()=>Math.random()-.5);
+    box.innerHTML = `<div class="captcha-options">
+      ${opts.map(o=>`<div class="captcha-opt" onclick="selectOpt(this,'${o}')">${o}</div>`).join('')}
+    </div><button class="captcha-refresh" style="margin-top:8px;width:100%" onclick="generateCaptcha()">🔄 Đổi câu hỏi</button>`;
+    return;
+  }
+
+  // fallback: math add
+  captchaType='math_add';
+  const a=randomInt(1,20),b=randomInt(1,20);
+  captchaAnswer = String(a+b);
+  qEl.textContent = `🔢 Tính: ${a} + ${b} = ?`;
+  box.innerHTML = `<div class="captcha-input-row">
+    <input class="captcha-input" id="cap-input" type="number" placeholder="Nhập kết quả">
+    <button class="captcha-refresh" onclick="generateCaptcha()">🔄</button>
+  </div>`;
+}
+
+let selectedOptValue = null;
+function selectOpt(el, val){
+  document.querySelectorAll('#captcha-content .captcha-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOptValue = val;
+}
+
+function verifyCaptcha(){
+  if(!captchaAnswer) return false;
+  if(captchaType==='math_add'||captchaType==='math_sub'||captchaType==='math_mul'||captchaType==='emoji_count'){
+    const inp = document.getElementById('cap-input');
+    return inp && String(inp.value.trim()) === captchaAnswer;
+  }
+  if(captchaType==='canvas_text'){
+    const inp = document.getElementById('cap-input');
+    return inp && inp.value.trim().toUpperCase() === captchaAnswer;
+  }
+  // option-based
+  return selectedOptValue === captchaAnswer;
+}
+
+// ═══════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════
+function switchAuthTab(tab){
+  document.getElementById('auth-login-form').style.display = tab==='login'?'flex':'none';
+  document.getElementById('auth-register-form').style.display = tab==='register'?'flex':'none';
+  document.getElementById('tab-login-btn').classList.toggle('active', tab==='login');
+  document.getElementById('tab-reg-btn').classList.toggle('active', tab==='register');
+  if(tab==='register'){ selectedOptValue=null; generateCaptcha(); }
+}
+
+async function doLogin(){
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  const errEl = document.getElementById('login-err');
+  errEl.style.display='none';
+  if(!u||!p){showAuthErr('login','Vui lòng nhập đầy đủ thông tin');return;}
+  const btn = document.getElementById('login-btn');
+  btn.disabled=true; btn.textContent='⏳ Đang đăng nhập...';
+  try{
+    const r = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail||'Đăng nhập thất bại');
+    saveSession(d.token, d.username, d.is_admin);
+    enterApp();
+  }catch(e){
+    showAuthErr('login', e.message);
+  }finally{
+    btn.disabled=false; btn.textContent='🔐 Đăng nhập';
+  }
+}
+
+async function doRegister(){
+  const u = document.getElementById('reg-user').value.trim();
+  const p = document.getElementById('reg-pass').value.trim();
+  const e = document.getElementById('reg-email').value.trim();
+  showAuthErr('reg','');
+  if(!u||!p||!e){showAuthErr('reg','Vui lòng nhập đầy đủ thông tin');return;}
+  if(!verifyCaptcha()){
+    // Flash wrong options
+    if(captchaType.startsWith('pick')||captchaType==='odd_one_out'||captchaType==='drag_order'){
+      const sel=document.querySelector('#captcha-content .captcha-opt.selected');
+      if(sel){sel.classList.add('wrong');setTimeout(()=>sel.classList.remove('wrong'),600);}
+    }
+    showAuthErr('reg','❌ CAPTCHA không đúng. Vui lòng thử lại.'); generateCaptcha(); return;
+  }
+  const btn = document.getElementById('reg-btn');
+  btn.disabled=true; btn.textContent='⏳ Đang đăng ký...';
+  try{
+    const r = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p,email:e})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail||'Đăng ký thất bại');
+    saveSession(d.token, d.username, d.is_admin);
+    enterApp();
+  }catch(ex){
+    showAuthErr('reg', ex.message);
+    generateCaptcha();
+  }finally{
+    btn.disabled=false; btn.textContent='📝 Đăng ký';
+  }
+}
+
+function showAuthErr(form, msg){
+  const el=document.getElementById(form+'-err');
+  if(!msg){el.style.display='none';return;}
+  el.textContent=msg; el.style.display='block';
+}
+
+function toggleRemember(){
+  rememberMe = !rememberMe;
+  localStorage.setItem('zct_remember', rememberMe?'1':'0');
+  const el = document.getElementById('remember-check');
+  if(el){ el.classList.toggle('checked', rememberMe); el.textContent = rememberMe?'✓':''; }
+}
+
+function saveSession(token, username, isAdmin){
+  SESSION_TOKEN = token;
+  CURRENT_USER  = username;
+  IS_ADMIN      = isAdmin;
+  const store = rememberMe ? localStorage : sessionStorage;
+  // Clear both first
+  localStorage.removeItem('zct_token'); localStorage.removeItem('zct_user'); localStorage.removeItem('zct_admin');
+  sessionStorage.removeItem('zct_token'); sessionStorage.removeItem('zct_user'); sessionStorage.removeItem('zct_admin');
+  store.setItem('zct_token', token);
+  store.setItem('zct_user',  username);
+  store.setItem('zct_admin', isAdmin?'1':'0');
+  if(rememberMe) localStorage.setItem('zct_remember','1');
+}
+
+function enterApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  const badge = document.getElementById('user-badge-el');
+  badge.textContent = IS_ADMIN ? '👑 '+CURRENT_USER : '👤 '+CURRENT_USER;
+  if(IS_ADMIN) badge.classList.add('admin-badge');
+  document.getElementById('mgmt-menu-item').style.display = IS_ADMIN?'flex':'none';
+  updateHistBadge();
+}
+
+async function doLogout(){
+  try{ await fetch('/api/logout',{method:'POST',headers:{'Authorization':'Bearer '+SESSION_TOKEN}}); }catch{}
+  ['zct_token','zct_user','zct_admin','zct_remember'].forEach(k=>{ localStorage.removeItem(k); sessionStorage.removeItem(k); });
+  SESSION_TOKEN=''; CURRENT_USER=''; IS_ADMIN=false; rememberMe=false;
+  document.getElementById('app-screen').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+  switchAuthTab('login');
+}
+
+// Auto-login if token exists
+(async function checkSession(){
+  if(!SESSION_TOKEN){ return; }
+  try{
+    const r = await fetch('/api/history',{headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
+    if(r.ok){ enterApp(); }
+    else { doLogout(); }
+  }catch{ doLogout(); }
+})();
+
+// ═══════════════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════════════
 setInterval(()=>{
   const n=new Date();
-  document.getElementById('clock').textContent=n.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const el=document.getElementById('clock');
+  if(el) el.textContent=n.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 },1000);
 
-// THEME
+// ═══════════════════════════════════════════════════════
+//  THEME / MENU
+// ═══════════════════════════════════════════════════════
 let isDark=true;
 function toggleTheme(){
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
   const tog=document.getElementById('theme-toggle');
   const lbl=document.getElementById('theme-label');
-  // dark=true -> tối đang bật -> toggle ON (xanh)
-  tog.classList.toggle('on', isDark);
+  tog.classList.toggle('on',isDark);
   if(lbl) lbl.innerHTML=(isDark?'🌙':'☀️')+' Chế độ '+(isDark?'tối':'sáng');
 }
+function toggleMenu(){ document.getElementById('main-menu').classList.toggle('open'); }
+function closeMenu(){ document.getElementById('main-menu').classList.remove('open'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('.dropdown'))closeMenu(); });
 
-// MENU
-function toggleMenu(){ document.getElementById('main-menu').classList.toggle('open') }
-function closeMenu(){ document.getElementById('main-menu').classList.remove('open') }
-document.addEventListener('click',e=>{ if(!e.target.closest('.dropdown'))closeMenu() });
+// ═══════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// MODALS
-function openModal(id){ document.getElementById(id).classList.add('open') }
-function closeModal(id){ document.getElementById(id).classList.remove('open') }
-
-// STATUS
+// ═══════════════════════════════════════════════════════
+//  STATUS / QR / RESULT
+// ═══════════════════════════════════════════════════════
 function setStatus(msg,type='idle'){
   document.getElementById('status-text').textContent=msg;
   const d=document.getElementById('dot'); d.className='dot';
@@ -487,7 +866,6 @@ function setStatus(msg,type='idle'){
   if(type==='err')d.classList.add('err');
   if(type==='warn')d.classList.add('warn');
 }
-
 function showQR(b64){
   document.getElementById('qr-frame').style.display='none';
   document.getElementById('scanned-box').style.display='none';
@@ -496,7 +874,6 @@ function showQR(b64){
   img.src='data:image/png;base64,'+b64; img.style.display='block';
   document.getElementById('qr-hint').textContent='📱 Mở Zalo → Quét mã QR này';
 }
-
 function showScanned(name){
   document.getElementById('qr-img').style.display='none';
   document.getElementById('qr-frame').style.display='none';
@@ -505,7 +882,6 @@ function showScanned(name){
   document.getElementById('scanned-name').textContent=name||'';
   document.getElementById('qr-hint').textContent='';
 }
-
 function showResult(data){
   currentData=data;
   document.getElementById('qr-area').style.display='none';
@@ -522,7 +898,11 @@ function showResult(data){
   document.getElementById('btn-reset').style.display='flex';
 }
 
+// ═══════════════════════════════════════════════════════
+//  WEBSOCKET LOGIN
+// ═══════════════════════════════════════════════════════
 function startLogin(){
+  if(!SESSION_TOKEN){toast('❌ Chưa đăng nhập!','#ff5252');return;}
   if(ws){ws.close();ws=null;}
   setStatus('Đang kết nối server...','active');
   document.getElementById('spinner').style.display='block';
@@ -530,7 +910,7 @@ function startLogin(){
   document.getElementById('btn-start').disabled=true;
   document.getElementById('btn-reset').style.display='flex';
   const sid=Math.random().toString(36).slice(2);
-  ws=new WebSocket(WS_BASE+'/'+sid);
+  ws=new WebSocket(WS_BASE+'/'+sid+'?token='+encodeURIComponent(SESSION_TOKEN));
   ws.onopen=()=>setStatus('Đang tạo mã QR...','active');
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
@@ -563,12 +943,13 @@ function resetUI(){
   document.getElementById('btn-reset').style.display='none';
 }
 
-// TABS
+// ═══════════════════════════════════════════════════════
+//  TABS / COOKIE ACTIONS
+// ═══════════════════════════════════════════════════════
 function switchTab(name){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['str','json','info'][i]===name));
+  document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('active',['str','json','info'][i]===name));
   document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',['tab-str','tab-json','tab-info'][i]==='tab-'+name));
 }
-
 function copyCookie(btn){
   if(!currentData)return;
   navigator.clipboard.writeText(currentData.cookie_str).then(()=>{
@@ -576,48 +957,29 @@ function copyCookie(btn){
     setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},2000);
   });
 }
-
 function buildTxt(d){
-  return [
-    '=== ZALO COOKIE ===',
-    'Tên: '+(d.name||'N/A'),
-    'SĐT: '+(d.phone||'Không rõ'),
-    'UserID: '+(d.user_id||'N/A'),
-    'IMEI: '+(d.imei||'N/A'),
-    'Thời gian: '+(d.time||''),
-    '',
-    '--- COOKIE STRING ---',
-    d.cookie_str||'',
-    '',
-    '--- COOKIE JSON ---',
-    JSON.stringify(d.cookies||{},null,2),
-  ].join('\n');
+  return ['=== ZALO COOKIE ===','Tên: '+(d.name||'N/A'),'SĐT: '+(d.phone||'Không rõ'),'UserID: '+(d.user_id||'N/A'),'IMEI: '+(d.imei||'N/A'),'Thời gian: '+(d.time||''),d.owner?'Lấy bởi: '+d.owner:'','','--- COOKIE STRING ---',d.cookie_str||'','','--- COOKIE JSON ---',JSON.stringify(d.cookies||{},null,2)].join('\n');
 }
-
 function downloadTxt(){
   if(!currentData)return;
   const blob=new Blob([buildTxt(currentData)],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='cookie_'+(currentData.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt';
-  a.click();
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='cookie_'+(currentData.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt'; a.click();
 }
 
-// HISTORY
+// ═══════════════════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════════════════
 let histPage=0, HIST_PP=5, histData=[];
-
-async function openHistory(){
-  await loadHistory();
-  openModal('history-modal');
-  closeMenu();
-}
-
+async function openHistory(){ await loadHistory(); openModal('history-modal'); closeMenu(); }
 async function loadHistory(){
-  try{const r=await fetch('/api/history');histData=await r.json();}
-  catch{histData=[];}
+  try{
+    const r=await fetch('/api/history',{headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
+    if(!r.ok) throw new Error('Lỗi tải lịch sử');
+    histData=await r.json();
+  }catch{histData=[];}
   histPage=0; renderHistory();
 }
-
 function renderHistory(){
   const list=document.getElementById('hist-list');
   const pages=document.getElementById('hist-pages');
@@ -629,16 +991,13 @@ function renderHistory(){
   if(!chunk.length){list.innerHTML='<div class="hist-empty">📭 Chưa có lịch sử nào</div>';pages.innerHTML='';return;}
   list.innerHTML=chunk.map((r,i)=>`
     <div class="hist-item">
-      <div class="hist-head">
-        <span class="hist-name">👤 ${r.name||'N/A'}</span>
-        <span class="hist-time">🕐 ${r.time||''}</span>
-      </div>
-      <div class="hist-phone">📱 ${r.phone||'Không rõ'} &nbsp;·&nbsp; 🆔 ${r.user_id||'N/A'}</div>
-      <div class="hist-phone" style="margin-top:2px">📡 IMEI: ${(r.imei||'').slice(0,20)}${(r.imei||'').length>20?'...':''}</div>
+      <div class="hist-head"><span class="hist-name">👤 ${r.name||'N/A'}</span><span class="hist-time">🕐 ${r.time||''}</span></div>
+      <div class="hist-phone">📱 ${r.phone||'Không rõ'} · 🆔 ${r.user_id||'N/A'}</div>
+      ${IS_ADMIN&&r.owner?`<div class="hist-phone" style="color:var(--yellow)">👤 Bởi: ${r.owner}</div>`:''}
       <div class="hist-actions">
-        <div class="hist-btn" onclick="viewHistDetail(${histPage*HIST_PP+i})">🔍 Xem chi tiết</div>
-        <div class="hist-btn" onclick="copyHistCookie(${histPage*HIST_PP+i},this)">📋 Copy cookie</div>
-        <div class="hist-btn dl" onclick="downloadHistTxt(${histPage*HIST_PP+i})">⬇️ Tải .txt</div>
+        <div class="hist-btn" onclick="viewHistDetail(${histPage*HIST_PP+i})">🔍 Chi tiết</div>
+        <div class="hist-btn" onclick="copyHistCookie(${histPage*HIST_PP+i},this)">📋 Copy</div>
+        <div class="hist-btn dl" onclick="downloadHistTxt(${histPage*HIST_PP+i})">⬇️ .txt</div>
       </div>
     </div>`).join('');
   pages.innerHTML='';
@@ -650,52 +1009,49 @@ function renderHistory(){
     pages.appendChild(b);
   }
 }
-
 function viewHistDetail(idx){
   const r=histData[idx]; viewingHistItem=r;
-  const html=`
+  document.getElementById('hist-detail-content').innerHTML=`
     <div class="acc-card" style="margin-bottom:12px">
       <div class="avatar-circle">👤</div>
       <div><div class="acc-name">${r.name||'N/A'}</div>
       <div class="acc-sub">📱 ${r.phone||'Không rõ'}</div>
-      <div class="acc-sub" style="font-size:11px">🕐 ${r.time||''}</div></div>
+      <div class="acc-sub" style="font-size:11px">🕐 ${r.time||''}</div>
+      ${IS_ADMIN&&r.owner?`<div class="acc-sub" style="color:var(--yellow)">👤 Bởi: ${r.owner}</div>`:''}</div>
     </div>
     <div class="info-row" style="margin-bottom:10px"><div class="info-label">🆔 User ID</div><div class="info-value">${r.user_id||'N/A'}</div></div>
     <div class="info-row" style="margin-bottom:10px"><div class="info-label">📡 IMEI</div><div class="info-value">${r.imei||'N/A'}</div></div>
     <div class="info-row"><div class="info-label">🍪 Cookie String</div><div class="info-value">${r.cookie_str||'N/A'}</div></div>`;
-  document.getElementById('hist-detail-content').innerHTML=html;
   openModal('hist-detail-modal');
 }
-
 function downloadHistDetail(){
   if(!viewingHistItem)return;
   const blob=new Blob([buildTxt(viewingHistItem)],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='cookie_'+(viewingHistItem.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt';
-  a.click();
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='cookie_'+(viewingHistItem.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt'; a.click();
 }
-
-function copyHistCookie(idx,btn){
-  const r=histData[idx];
-  navigator.clipboard.writeText(r.cookie_str||'').then(()=>{
-    const o=btn.textContent; btn.textContent='✅ Copied!';
-    setTimeout(()=>{btn.textContent=o;},1800);
+function copyHistDetailCookie(btn){
+  if(!viewingHistItem)return;
+  navigator.clipboard.writeText(viewingHistItem.cookie_str||'').then(()=>{
+    const o=btn.innerHTML; btn.innerHTML='✅ Đã copy!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},2000);
   });
 }
-
+function copyHistCookie(idx,btn){
+  navigator.clipboard.writeText(histData[idx].cookie_str||'').then(()=>{
+    const o=btn.textContent; btn.textContent='✅ Copied!'; setTimeout(()=>{btn.textContent=o;},1800);
+  });
+}
 function downloadHistTxt(idx){
   const r=histData[idx];
   const blob=new Blob([buildTxt(r)],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='cookie_'+(r.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt';
-  a.click();
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='cookie_'+(r.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt'; a.click();
 }
-
 async function updateHistBadge(){
   try{
-    const r=await fetch('/api/history');
+    const r=await fetch('/api/history',{headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
+    if(!r.ok)return;
     const d=await r.json();
     const b=document.getElementById('hist-badge');
     if(d.length>0){b.textContent=d.length;b.style.display='flex';}
@@ -703,75 +1059,132 @@ async function updateHistBadge(){
   }catch{}
 }
 
+// ═══════════════════════════════════════════════════════
+//  ADMIN MANAGEMENT
+// ═══════════════════════════════════════════════════════
+let mgmtPage=0, mgmtTotal=0, MGMT_PP=20;
+async function openMgmt(){ mgmtPage=0; await loadMgmt(); openModal('mgmt-modal'); }
+async function loadMgmt(){
+  try{
+    const r=await fetch('/api/admin/users?page='+mgmtPage,{headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
+    if(!r.ok) throw new Error('Không có quyền');
+    const d=await r.json();
+    mgmtTotal=d.total;
+    document.getElementById('mgmt-count').textContent='('+d.total+' tài khoản)';
+    renderMgmt(d.users, d.total, d.per_page, d.page);
+  }catch(e){toast('❌ '+e.message,'#ff5252');}
+}
+function renderMgmt(users, total, pp, page){
+  const totalPages=Math.max(1,Math.ceil(total/pp));
+  const list=document.getElementById('mgmt-list');
+  const pages=document.getElementById('mgmt-pages');
+  if(!users.length){list.innerHTML='<div class="hist-empty">Chưa có tài khoản nào</div>';pages.innerHTML='';return;}
+  list.innerHTML=`<div style="overflow-x:auto"><table class="user-table">
+    <thead><tr>
+      <th>#</th><th>Tên đăng nhập</th><th>Gmail</th><th>Mật khẩu (hash)</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th>
+    </tr></thead>
+    <tbody>${users.map((u,i)=>`<tr>
+      <td style="color:var(--muted)">${page*pp+i+1}</td>
+      <td><b>${u.username}</b></td>
+      <td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td>
+      <td><div class="pw-reveal" title="Click để copy hash" onclick="navigator.clipboard.writeText('${u.password}');toast('✅ Đã copy hash','#00e676')">${u.password.slice(0,16)}...</div></td>
+      <td style="font-size:11px;color:var(--muted)">${u.created||'—'}</td>
+      <td><span class="u-active ${u.active?'yes':'no'}">${u.active?'Hoạt động':'Đã khóa'}</span></td>
+      <td>
+        <button class="u-action" onclick="toggleUser('${u.username}',this)">${u.active?'🔒 Khóa':'🔓 Mở'}</button>
+        <button class="u-action del" onclick="deleteUser('${u.username}')">🗑 Xóa</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+  pages.innerHTML='';
+  for(let i=0;i<totalPages;i++){
+    const b=document.createElement('button');
+    b.className='page-btn'+(i===page?' active':'');
+    b.textContent=i+1;
+    b.onclick=()=>{mgmtPage=i;loadMgmt();};
+    pages.appendChild(b);
+  }
+}
+async function toggleUser(username, btn){
+  try{
+    const r=await fetch('/api/admin/users/'+username+'/toggle',{method:'POST',headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
+    if(!r.ok) throw new Error('Lỗi');
+    await loadMgmt();
+    toast('✅ Đã cập nhật trạng thái','#00e676');
+  }catch(e){toast('❌ '+e.message,'#ff5252');}
+}
+async function deleteUser(username){
+  if(!confirm('Xóa tài khoản "'+username+'"?')) return;
+  try{
+    const r=await fetch('/api/admin/users/'+username,{method:'DELETE',headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
+    if(!r.ok) throw new Error('Lỗi xóa');
+    await loadMgmt();
+    toast('✅ Đã xóa tài khoản','#00e676');
+  }catch(e){toast('❌ '+e.message,'#ff5252');}
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST / AUDIO
+// ═══════════════════════════════════════════════════════
 function toast(msg,color='#4f9eff',dur=2500){
   const t=document.createElement('div');
   t.className='toast'; t.style.background=color; t.textContent=msg;
   document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},dur);
 }
-
-updateHistBadge();
-
-// ===== AUDIO =====
-let musicOn = false, sfxOn = true;
-const bgMusic = document.getElementById('bg-music');
-bgMusic.volume = 0.18;
-
+let musicOn=false, sfxOn=true;
+const bgMusic=document.getElementById('bg-music');
+bgMusic.volume=0.18;
+// Đảm bảo phát lặp lại khi kết thúc (loop attr đã có, thêm event phòng hờ)
+bgMusic.addEventListener('ended',()=>{ bgMusic.currentTime=0; bgMusic.play().catch(()=>{}); });
 function toggleMusic(){
-  musicOn = !musicOn;
-  const tog = document.getElementById('music-toggle');
-  const lbl = document.getElementById('music-label');
-  tog.classList.toggle('on', musicOn);
-  lbl.textContent = musicOn ? '🎵 Nhạc nền' : '🎵 Nhạc nền';
-  if(musicOn){ bgMusic.play().catch(()=>{}); }
-  else { bgMusic.pause(); }
+  musicOn=!musicOn;
+  document.getElementById('music-toggle').classList.toggle('on',musicOn);
+  if(musicOn){bgMusic.play().catch(()=>{});}else{bgMusic.pause();}
 }
 
+// Khởi tạo trạng thái nút Ghi nhớ ngay khi load
+(function initRememberBtn(){
+  const el=document.getElementById('remember-check');
+  if(!el) return;
+  el.classList.toggle('checked', rememberMe);
+  el.textContent = rememberMe?'✓':'';
+  // Pre-fill username nếu đã ghi nhớ
+  if(rememberMe && CURRENT_USER){
+    const u=document.getElementById('login-user');
+    if(u) u.value=CURRENT_USER;
+  }
+})();
 function toggleSfx(){
-  sfxOn = !sfxOn;
-  const tog = document.getElementById('sfx-toggle');
-  tog.classList.toggle('on', sfxOn);
-  if(sfxOn) playSfx('click');
+  sfxOn=!sfxOn;
+  document.getElementById('sfx-toggle').classList.toggle('on',sfxOn);
+  if(sfxOn)playSfx('click');
 }
-
 function playSfx(type){
-  if(!sfxOn) return;
+  if(!sfxOn)return;
   try{
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    if(type==='click'){
-      osc.frequency.setValueAtTime(880,ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+0.08);
-      gain.gain.setValueAtTime(0.15,ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.12);
-    } else if(type==='success'){
-      [523,659,784,1047].forEach((f,i)=>{
-        const o2=ctx.createOscillator(),g2=ctx.createGain();
-        o2.connect(g2);g2.connect(ctx.destination);
-        o2.frequency.value=f;
-        g2.gain.setValueAtTime(0.12,ctx.currentTime+i*0.1);
-        g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.15);
-        o2.start(ctx.currentTime+i*0.1);
-        o2.stop(ctx.currentTime+i*0.1+0.15);
-      });
-    } else if(type==='error'){
-      osc.frequency.setValueAtTime(300,ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150,ctx.currentTime+0.2);
-      gain.gain.setValueAtTime(0.15,ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.2);
-    }
-  }catch(e){}
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(type==='click'){osc.frequency.setValueAtTime(880,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+.08);gain.gain.setValueAtTime(.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.12);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.12);}
+    else if(type==='success'){[523,659,784,1047].forEach((f,i)=>{const o2=ctx.createOscillator(),g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);o2.frequency.value=f;g2.gain.setValueAtTime(.12,ctx.currentTime+i*.1);g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.1+.15);o2.start(ctx.currentTime+i*.1);o2.stop(ctx.currentTime+i*.1+.15);});}
+    else if(type==='error'){osc.frequency.setValueAtTime(300,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(150,ctx.currentTime+.2);gain.gain.setValueAtTime(.15,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+.2);}
+  }catch{}
 }
+document.addEventListener('click',e=>{
+  if(!sfxOn)return;
+  const el=e.target.closest('button,.btn,.support-btn,.d-item,.d-toggle,.hist-btn,.tab,.page-btn,.captcha-opt,.auth-tab');
+  if(el)playSfx('click');
+});
 
-// Patch buttons to play click sound
-document.addEventListener('click', e => {
-  if(!sfxOn) return;
-  const el = e.target.closest('button,.btn,.support-btn,.d-item,.d-toggle,.hist-btn,.tab,.page-btn');
-  if(el) playSfx('click');
+// ─ Enter key in login ─
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const ls=document.getElementById('auth-login-form');
+    const rs=document.getElementById('auth-register-form');
+    if(ls&&ls.style.display!=='none') doLogin();
+    else if(rs&&rs.style.display!=='none') doRegister();
+  }
 });
 </script>
 </body>
