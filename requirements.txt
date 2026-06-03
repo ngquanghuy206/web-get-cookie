@@ -7,3 +7,4 @@ zlapi
 pycryptodome
 requests
 Pillow
+python-multipart
