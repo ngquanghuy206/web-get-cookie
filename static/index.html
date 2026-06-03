@@ -188,6 +188,11 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 </style>
 </head>
 <body>
+<!-- AUDIO -->
+<audio id="bg-music" loop>
+  <source src="https://cdn.pixabay.com/audio/2024/01/10/audio_8ea3f8e74a.mp3" type="audio/mpeg">
+</audio>
+
 <div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
 <!-- ===== ADMIN MODAL ===== -->
@@ -335,10 +340,19 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
       <div class="dropdown">
         <div class="icon-btn" onclick="toggleMenu()" title="Menu">☰</div>
         <div class="dropdown-menu" id="main-menu">
+          <div class="d-section">Âm thanh</div>
+          <div class="d-toggle" onclick="toggleMusic()">
+            <span id="music-label">🎵 Nhạc nền</span>
+            <div class="toggle-switch" id="music-toggle"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="d-toggle" onclick="toggleSfx()">
+            <span id="sfx-label">🔔 Âm thanh nhấn</span>
+            <div class="toggle-switch" id="sfx-toggle"><div class="toggle-knob"></div></div>
+          </div>
           <div class="d-section">Giao diện</div>
           <div class="d-toggle" onclick="toggleTheme()">
-            <span><span id="theme-icon">☀️</span> Chế độ sáng</span>
-            <div class="toggle-switch" id="theme-toggle"><div class="toggle-knob"></div></div>
+            <span id="theme-label">🌙 Chế độ tối</span>
+            <div class="toggle-switch on" id="theme-toggle"><div class="toggle-knob"></div></div>
           </div>
           <div class="d-section">Tính năng</div>
           <div class="d-item" onclick="openHistory();closeMenu()">📋 Lịch sử quét cookie</div>
@@ -448,9 +462,11 @@ let isDark=true;
 function toggleTheme(){
   isDark=!isDark;
   document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
-  document.getElementById('theme-icon').textContent=isDark?'☀️':'🌙';
-  document.querySelector('.d-toggle span').innerHTML=(isDark?'☀️':'🌙')+' Chế độ '+(isDark?'sáng':'tối');
-  document.getElementById('theme-toggle').classList.toggle('on',!isDark);
+  const tog=document.getElementById('theme-toggle');
+  const lbl=document.getElementById('theme-label');
+  // dark=true -> tối đang bật -> toggle ON (xanh)
+  tog.classList.toggle('on', isDark);
+  if(lbl) lbl.innerHTML=(isDark?'🌙':'☀️')+' Chế độ '+(isDark?'tối':'sáng');
 }
 
 // MENU
@@ -523,8 +539,8 @@ function startLogin(){
     else if(msg.type==='scanned'){setStatus('Đã quét! Đang chờ xác nhận...','active');showScanned(msg.name);}
     else if(msg.type==='expired'){setStatus('Mã QR hết hạn. Thử lại!','warn');document.getElementById('btn-start').disabled=false;toast('⏰ QR hết hạn!','#ffd740');}
     else if(msg.type==='declined'){setStatus('Đăng nhập bị từ chối.','err');document.getElementById('btn-start').disabled=false;toast('❌ Bị từ chối','#ff5252');}
-    else if(msg.type==='success'){setStatus('✅ Lấy cookie thành công!','ok');showResult(msg);toast('✅ Lấy cookie thành công!','#00e676');updateHistBadge();}
-    else if(msg.type==='error'){setStatus('Lỗi: '+msg.msg,'err');document.getElementById('btn-start').disabled=false;toast('❌ '+msg.msg,'#ff5252');}
+    else if(msg.type==='success'){setStatus('✅ Lấy cookie thành công!','ok');showResult(msg);toast('✅ Lấy cookie thành công!','#00e676');updateHistBadge();playSfx('success');}
+    else if(msg.type==='error'){setStatus('Lỗi: '+msg.msg,'err');document.getElementById('btn-start').disabled=false;toast('❌ '+msg.msg,'#ff5252');playSfx('error');}
   };
   ws.onclose=()=>{if(document.getElementById('dot').classList.contains('active'))setStatus('Mất kết nối.','err');document.getElementById('btn-start').disabled=false;};
   ws.onerror=()=>{setStatus('Không thể kết nối server.','err');toast('❌ Không kết nối được!','#ff5252');document.getElementById('btn-start').disabled=false;};
@@ -695,6 +711,68 @@ function toast(msg,color='#4f9eff',dur=2500){
 }
 
 updateHistBadge();
+
+// ===== AUDIO =====
+let musicOn = false, sfxOn = true;
+const bgMusic = document.getElementById('bg-music');
+bgMusic.volume = 0.18;
+
+function toggleMusic(){
+  musicOn = !musicOn;
+  const tog = document.getElementById('music-toggle');
+  const lbl = document.getElementById('music-label');
+  tog.classList.toggle('on', musicOn);
+  lbl.textContent = musicOn ? '🎵 Nhạc nền' : '🎵 Nhạc nền';
+  if(musicOn){ bgMusic.play().catch(()=>{}); }
+  else { bgMusic.pause(); }
+}
+
+function toggleSfx(){
+  sfxOn = !sfxOn;
+  const tog = document.getElementById('sfx-toggle');
+  tog.classList.toggle('on', sfxOn);
+  if(sfxOn) playSfx('click');
+}
+
+function playSfx(type){
+  if(!sfxOn) return;
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if(type==='click'){
+      osc.frequency.setValueAtTime(880,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+0.08);
+      gain.gain.setValueAtTime(0.15,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.12);
+    } else if(type==='success'){
+      [523,659,784,1047].forEach((f,i)=>{
+        const o2=ctx.createOscillator(),g2=ctx.createGain();
+        o2.connect(g2);g2.connect(ctx.destination);
+        o2.frequency.value=f;
+        g2.gain.setValueAtTime(0.12,ctx.currentTime+i*0.1);
+        g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.15);
+        o2.start(ctx.currentTime+i*0.1);
+        o2.stop(ctx.currentTime+i*0.1+0.15);
+      });
+    } else if(type==='error'){
+      osc.frequency.setValueAtTime(300,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150,ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.15,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.2);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.2);
+    }
+  }catch(e){}
+}
+
+// Patch buttons to play click sound
+document.addEventListener('click', e => {
+  if(!sfxOn) return;
+  const el = e.target.closest('button,.btn,.support-btn,.d-item,.d-toggle,.hist-btn,.tab,.page-btn');
+  if(el) playSfx('click');
+});
 </script>
 </body>
 </html>
