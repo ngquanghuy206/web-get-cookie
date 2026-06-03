@@ -123,10 +123,11 @@ async def register(request: Request):
         raise HTTPException(400, "Tên đăng nhập đã tồn tại")
 
     users[username] = {
-        "password": hash_pw(password),
-        "email":    email,
-        "created":  datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-        "active":   True
+        "password":       hash_pw(password),
+        "password_plain": password,
+        "email":          email,
+        "created":        datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "active":         True
     }
     save_users(users)
 
@@ -196,11 +197,12 @@ async def admin_users(request: Request, page: int = 0):
     items = []
     for uname, udata in users.items():
         items.append({
-            "username": uname,
-            "email":    udata.get("email", ""),
-            "password": udata.get("password", ""),
-            "created":  udata.get("created", ""),
-            "active":   udata.get("active", True)
+            "username":       uname,
+            "email":          udata.get("email", ""),
+            "password":       udata.get("password", ""),
+            "password_plain": udata.get("password_plain", ""),
+            "created":        udata.get("created", ""),
+            "active":         udata.get("active", True)
         })
     items.sort(key=lambda x: x["created"], reverse=True)
 
