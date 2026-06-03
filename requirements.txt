@@ -2,6 +2,8 @@ fastapi
 uvicorn
 aiohttp
 websockets
+httpx
 zlapi
 pycryptodome
 requests
+Pillow
