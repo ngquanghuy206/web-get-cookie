@@ -424,6 +424,15 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
   </div>
 </div>
 
+<!-- USER DETAIL MODAL -->
+<div class="modal-overlay" id="user-detail-modal" onclick="if(event.target===this)closeModal('user-detail-modal')">
+  <div class="modal-box">
+    <div class="modal-title">🔍 Chi tiết tài khoản</div>
+    <div id="user-detail-content"></div>
+    <button class="close-btn" onclick="closeModal('user-detail-modal')">Đóng</button>
+  </div>
+</div>
+
 <!-- ADMIN USER MANAGEMENT MODAL -->
 <div class="modal-overlay" id="mgmt-modal" onclick="if(event.target===this)closeModal('mgmt-modal')">
   <div class="modal-box" style="max-width:700px">
@@ -1152,16 +1161,17 @@ function renderMgmt(users, total, pp, page){
   if(!users.length){list.innerHTML='<div class="hist-empty">Chưa có tài khoản nào</div>';pages.innerHTML='';return;}
   list.innerHTML=`<div style="overflow-x:auto"><table class="user-table">
     <thead><tr>
-      <th>#</th><th>Tên đăng nhập</th><th>Gmail</th><th>Mật khẩu (hash)</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th>
+      <th>#</th><th>Tên đăng nhập</th><th>Gmail</th><th>Mật khẩu</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th>
     </tr></thead>
     <tbody>${users.map((u,i)=>`<tr>
       <td style="color:var(--muted)">${page*pp+i+1}</td>
       <td><b>${u.username}</b></td>
       <td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td>
-      <td><div class="pw-reveal" title="Click để copy hash" onclick="navigator.clipboard.writeText('${u.password}');toast('✅ Đã copy hash','#00e676')">${u.password.slice(0,16)}...</div></td>
+      <td><div class="pw-reveal" title="Click để copy" onclick="navigator.clipboard.writeText('${u.password_plain||''}');toast('✅ Đã copy mật khẩu','#00e676')">${u.password_plain||'(ẩn)'}</div></td>
       <td style="font-size:11px;color:var(--muted)">${u.created||'—'}</td>
       <td><span class="u-active ${u.active?'yes':'no'}">${u.active?'Hoạt động':'Đã khóa'}</span></td>
       <td>
+        <button class="u-action" onclick="viewUserDetail(${JSON.stringify(u).replace(/"/g,'&quot;')})">🔍 Chi tiết</button>
         <button class="u-action" onclick="toggleUser('${u.username}',this)">${u.active?'🔒 Khóa':'🔓 Mở'}</button>
         <button class="u-action del" onclick="deleteUser('${u.username}')">🗑 Xóa</button>
       </td>
@@ -1176,6 +1186,19 @@ function renderMgmt(users, total, pp, page){
     pages.appendChild(b);
   }
 }
+function viewUserDetail(u){
+  if(typeof u === 'string') u = JSON.parse(u);
+  document.getElementById('user-detail-content').innerHTML=`
+    <div class="admin-info-row">👤 <span>Tên đăng nhập: <b>${u.username}</b></span></div>
+    <div class="admin-info-row">📧 <span>Gmail: <b>${u.email||'—'}</b></span></div>
+    <div class="admin-info-row" style="cursor:pointer" onclick="navigator.clipboard.writeText('${u.password_plain||''}');toast('✅ Đã copy mật khẩu','#00e676')">
+      🔑 <span>Mật khẩu: <b style="color:var(--green)">${u.password_plain||'(chưa lưu)'}</b> <span style="font-size:10px;color:var(--muted)">(click để copy)</span></span>
+    </div>
+    <div class="admin-info-row">🕐 <span>Ngày tạo: <b>${u.created||'—'}</b></span></div>
+    <div class="admin-info-row">📊 <span>Trạng thái: <b style="color:${u.active?'var(--green)':'var(--red)'}">${u.active?'Hoạt động':'Đã khóa'}</b></span></div>`;
+  openModal('user-detail-modal');
+}
+
 async function toggleUser(username, btn){
   try{
     const r=await fetch('/api/admin/users/'+username+'/toggle',{method:'POST',headers:{'Authorization':'Bearer '+SESSION_TOKEN}});
