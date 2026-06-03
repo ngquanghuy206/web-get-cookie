@@ -261,13 +261,16 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
       </label>
       <div class="auth-err" id="login-err"></div>
       <button class="auth-btn" id="login-btn" onclick="doLogin()">🔐 Đăng nhập</button>
+      <div style="text-align:center;margin-top:10px">
+        <span onclick="openForgotModal()" style="color:var(--blue);font-size:13px;cursor:pointer;text-decoration:underline">Quên mật khẩu?</span>
+      </div>
     </div>
 
     <!-- REGISTER FORM -->
     <div id="auth-register-form" class="auth-form" style="display:none">
       <div class="field-group">
         <div class="field-label">Tên đăng nhập</div>
-        <input class="field-input" id="reg-user" type="text" placeholder="Tối thiểu 4 ký tự" autocomplete="username">
+        <input class="field-input" id="reg-user" type="text" placeholder="Tối thiểu 6 ký tự" autocomplete="username">
       </div>
       <div class="field-group">
         <div class="field-label">Mật khẩu</div>
@@ -288,6 +291,54 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
       <div class="auth-err" id="reg-err"></div>
       <button class="auth-btn" id="reg-btn" onclick="doRegister()">📝 Đăng ký</button>
     </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgot-modal" onclick="if(event.target===this)closeModal('forgot-modal')">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-title">🔑 Quên mật khẩu</div>
+
+    <!-- STEP 1: Nhập email -->
+    <div id="forgot-step1">
+      <div class="field-group">
+        <div class="field-label">Gmail đã đăng ký</div>
+        <input class="field-input" id="forgot-email" type="email" placeholder="example@gmail.com">
+      </div>
+      <div class="auth-err" id="forgot-err1"></div>
+      <button class="auth-btn" id="forgot-btn1" onclick="doForgotSend()">📧 Gửi mã OTP</button>
+    </div>
+
+    <!-- STEP 2: Nhập OTP -->
+    <div id="forgot-step2" style="display:none">
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">Nhập mã OTP đã gửi về Gmail của bạn (có hiệu lực 5 phút)</p>
+      <div class="field-group">
+        <div class="field-label">Mã OTP (6 số)</div>
+        <input class="field-input" id="forgot-otp" type="text" maxlength="6" placeholder="123456" style="letter-spacing:6px;font-size:20px;text-align:center">
+      </div>
+      <div class="auth-err" id="forgot-err2"></div>
+      <button class="auth-btn" id="forgot-btn2" onclick="doVerifyOtp()">✅ Xác nhận OTP</button>
+      <div style="text-align:center;margin-top:8px">
+        <span onclick="doForgotSend()" style="color:var(--blue);font-size:12px;cursor:pointer">Gửi lại OTP</span>
+      </div>
+    </div>
+
+    <!-- STEP 3: Đặt MK mới -->
+    <div id="forgot-step3" style="display:none">
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">OTP hợp lệ! Nhập mật khẩu mới</p>
+      <div class="field-group">
+        <div class="field-label">Mật khẩu mới</div>
+        <input class="field-input" id="forgot-newpw" type="password" placeholder="Tối thiểu 6 ký tự">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Xác nhận mật khẩu</div>
+        <input class="field-input" id="forgot-confirmpw" type="password" placeholder="Nhập lại mật khẩu mới">
+      </div>
+      <div class="auth-err" id="forgot-err3"></div>
+      <button class="auth-btn" id="forgot-btn3" onclick="doResetPassword()">🔐 Đặt lại mật khẩu</button>
+    </div>
+
+    <button class="close-btn" onclick="closeModal('forgot-modal')" style="margin-top:12px">Đóng</button>
   </div>
 </div>
 
@@ -800,6 +851,78 @@ function switchAuthTab(tab){
   document.getElementById('tab-login-btn').classList.toggle('active', tab==='login');
   document.getElementById('tab-reg-btn').classList.toggle('active', tab==='register');
   if(tab==='register'){ selectedOptValue=null; generateCaptcha(); }
+}
+
+
+let _forgotEmail = '';
+let _forgotOtp   = '';
+
+function openForgotModal(){
+  _forgotEmail = ''; _forgotOtp = '';
+  document.getElementById('forgot-step1').style.display='block';
+  document.getElementById('forgot-step2').style.display='none';
+  document.getElementById('forgot-step3').style.display='none';
+  document.getElementById('forgot-email').value='';
+  document.getElementById('forgot-otp').value='';
+  document.getElementById('forgot-newpw').value='';
+  document.getElementById('forgot-confirmpw').value='';
+  ['forgot-err1','forgot-err2','forgot-err3'].forEach(id=>document.getElementById(id).textContent='');
+  openModal('forgot-modal');
+}
+
+async function doForgotSend(){
+  const email = document.getElementById('forgot-email').value.trim();
+  const err   = document.getElementById('forgot-err1');
+  const btn   = document.getElementById('forgot-btn1');
+  if(!email){err.textContent='Vui lòng nhập Gmail';return;}
+  if(!email.toLowerCase().endsWith('@gmail.com')){err.textContent='Chỉ chấp nhận @gmail.com';return;}
+  btn.disabled=true; btn.textContent='⏳ Đang gửi...'; err.textContent='';
+  try{
+    const r = await fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail||'Lỗi gửi OTP');
+    _forgotEmail = email;
+    toast('📧 Đã gửi OTP về Gmail!','#00e676');
+    document.getElementById('forgot-step1').style.display='none';
+    document.getElementById('forgot-step2').style.display='block';
+  }catch(e){err.textContent=e.message;}
+  finally{btn.disabled=false;btn.textContent='📧 Gửi mã OTP';}
+}
+
+async function doVerifyOtp(){
+  const otp = document.getElementById('forgot-otp').value.trim();
+  const err  = document.getElementById('forgot-err2');
+  const btn  = document.getElementById('forgot-btn2');
+  if(!otp||otp.length!==6){err.textContent='Nhập đúng 6 số OTP';return;}
+  btn.disabled=true; btn.textContent='⏳ Đang kiểm tra...'; err.textContent='';
+  try{
+    const r = await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:_forgotEmail,otp})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail||'OTP không hợp lệ');
+    _forgotOtp = otp;
+    toast('✅ OTP hợp lệ!','#00e676');
+    document.getElementById('forgot-step2').style.display='none';
+    document.getElementById('forgot-step3').style.display='block';
+  }catch(e){err.textContent=e.message;}
+  finally{btn.disabled=false;btn.textContent='✅ Xác nhận OTP';}
+}
+
+async function doResetPassword(){
+  const newpw    = document.getElementById('forgot-newpw').value.trim();
+  const confirmpw= document.getElementById('forgot-confirmpw').value.trim();
+  const err      = document.getElementById('forgot-err3');
+  const btn      = document.getElementById('forgot-btn3');
+  if(!newpw||newpw.length<6){err.textContent='Mật khẩu phải ≥ 6 ký tự';return;}
+  if(newpw!==confirmpw){err.textContent='Mật khẩu xác nhận không khớp';return;}
+  btn.disabled=true; btn.textContent='⏳ Đang đặt lại...'; err.textContent='';
+  try{
+    const r = await fetch('/api/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:_forgotEmail,otp:_forgotOtp,new_password:newpw})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail||'Lỗi đặt lại mật khẩu');
+    toast('🎉 Đặt lại mật khẩu thành công!','#00e676');
+    closeModal('forgot-modal');
+  }catch(e){err.textContent=e.message;}
+  finally{btn.disabled=false;btn.textContent='🔐 Đặt lại mật khẩu';}
 }
 
 async function doLogin(){
