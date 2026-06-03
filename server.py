@@ -1,4 +1,6 @@
-import asyncio, uuid, json, os, aiohttp, hashlib, secrets, re
+import asyncio, uuid, json, os, aiohttp, hashlib, secrets, re, smtplib, random
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -12,6 +14,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 TG_BOT_TOKEN  = "7818000635:AAGJ4troYL-SpYEfoTqxj_axm4B-YPt1hvU"
 TG_ADMIN_ID   = 7454964260
+
+# Gmail SMTP config - đổi thành gmail app password của mày
+SMTP_EMAIL    = "dzimeomeo@gmail.com"
+SMTP_PASSWORD = "lcjqxjevirfsxime"
+
+# OTP store: {email: {"otp": "123456", "expires": timestamp, "username": "..."}}
+otp_store = {}
 HISTORY_FILE  = "history.json"
 USERS_FILE    = "users.json"
 SESSIONS_FILE = "sessions.json"
@@ -109,18 +118,20 @@ async def register(request: Request):
 
     if not username or not password or not email:
         raise HTTPException(400, "Thiếu thông tin")
-    if len(username) < 4:
-        raise HTTPException(400, "Tên đăng nhập phải ≥ 4 ký tự")
+    if len(username) < 6:
+        raise HTTPException(400, "Tên đăng nhập phải ≥ 6 ký tự")
     if len(password) < 6:
         raise HTTPException(400, "Mật khẩu phải ≥ 6 ký tự")
-    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        raise HTTPException(400, "Email không hợp lệ")
+    if not re.match(r"[^@]+@gmail\.com$", email, re.IGNORECASE):
+        raise HTTPException(400, "Chỉ chấp nhận email @gmail.com")
     if username in ADMIN_ACCOUNTS:
         raise HTTPException(400, "Tên đăng nhập đã tồn tại")
 
     users = load_users()
     if username in users:
         raise HTTPException(400, "Tên đăng nhập đã tồn tại")
+    if any(u.get("email","").lower() == email.lower() for u in users.values()):
+        raise HTTPException(400, "Email này đã được đăng ký")
 
     users[username] = {
         "password":       hash_pw(password),
@@ -173,6 +184,150 @@ async def logout(request: Request):
         sessions.pop(token, None)
         save_sessions(sessions)
     return JSONResponse({"ok": True})
+
+
+def send_otp_email(to_email: str, otp: str, username: str):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "🔑 Mã OTP xác nhận - Zalo Cookie Tool by Dzi Meo Meo"
+    msg["From"]    = f"Dzi Meo Meo - Zalo Cookie Tool <{SMTP_EMAIL}>"
+    msg["To"]      = to_email
+    html = f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#0f1117;font-family:Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f1117;padding:40px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:#1a1f2e;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+
+        <!-- HEADER -->
+        <tr><td style="background:linear-gradient(135deg,#1e90ff,#00c6ff);padding:32px;text-align:center">
+          <div style="width:64px;height:64px;background:rgba(255,255,255,0.15);border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:64px">🍪</div>
+          <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:0.5px">Zalo Cookie Tool</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.75);font-size:13px">by Dzi Meo Meo</p>
+        </td></tr>
+
+        <!-- BODY -->
+        <tr><td style="padding:36px 40px">
+          <p style="margin:0 0 8px;color:#aab0c0;font-size:14px">Xin chào,</p>
+          <p style="margin:0 0 24px;color:#e0e6f0;font-size:15px">Mã xác thực đặt lại mật khẩu của bạn là:</p>
+
+          <!-- OTP BOX -->
+          <div style="background:#0f1117;border:2px solid #1e90ff;border-radius:12px;padding:28px;text-align:center;margin:0 0 24px">
+            <span style="font-size:42px;font-weight:800;letter-spacing:12px;color:#1e90ff;font-family:monospace">{otp}</span>
+          </div>
+
+          <p style="margin:0 0 8px;color:#aab0c0;font-size:13px;text-align:center">
+            Mã có hiệu lực trong <strong style="color:#fff">5 phút</strong>
+          </p>
+          <p style="margin:0;color:#ff5c5c;font-size:12px;text-align:center">⚠️ Không chia sẻ mã này với bất kỳ ai</p>
+        </td></tr>
+
+        <!-- FOOTER -->
+        <tr><td style="background:#12161f;padding:20px 40px;border-top:1px solid #2a3145">
+          <p style="margin:0;color:#555;font-size:11px;text-align:center">
+            Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.<br>
+            © 2026 Zalo Cookie Tool · by Dzi Meo Meo
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>"""
+    msg.attach(MIMEText(html, "html"))
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+            s.login(SMTP_EMAIL, SMTP_PASSWORD)
+            s.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+        return True
+    except Exception as e:
+        print(f"SMTP error: {e}")
+        return False
+
+@app.post("/api/forgot-password")
+async def forgot_password(request: Request):
+    data     = await request.json()
+    email    = (data.get("email") or "").strip().lower()
+    if not email:
+        raise HTTPException(400, "Thiếu email")
+    if not re.match(r"[^@]+@gmail\.com$", email, re.IGNORECASE):
+        raise HTTPException(400, "Chỉ chấp nhận email @gmail.com")
+
+    users = load_users()
+    user_found = None
+    for uname, udata in users.items():
+        if udata.get("email","").lower() == email:
+            user_found = uname
+            break
+    if not user_found:
+        raise HTTPException(404, "Email không tồn tại trong hệ thống")
+
+    otp  = str(random.randint(100000, 999999))
+    import time
+    otp_store[email] = {"otp": otp, "expires": time.time() + 300, "username": user_found}
+
+    sent = await asyncio.get_event_loop().run_in_executor(None, send_otp_email, email, otp, user_found)
+    if not sent:
+        raise HTTPException(500, "Không thể gửi email, vui lòng thử lại")
+
+    return JSONResponse({"ok": True, "msg": f"Đã gửi OTP về {email}"})
+
+@app.post("/api/verify-otp")
+async def verify_otp(request: Request):
+    import time
+    data  = await request.json()
+    email = (data.get("email") or "").strip().lower()
+    otp   = (data.get("otp") or "").strip()
+    if not email or not otp:
+        raise HTTPException(400, "Thiếu thông tin")
+
+    record = otp_store.get(email)
+    if not record:
+        raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+    if time.time() > record["expires"]:
+        otp_store.pop(email, None)
+        raise HTTPException(400, "OTP đã hết hạn, vui lòng yêu cầu lại")
+    if record["otp"] != otp:
+        raise HTTPException(400, "OTP không đúng")
+
+    return JSONResponse({"ok": True, "username": record["username"]})
+
+@app.post("/api/reset-password")
+async def reset_password(request: Request):
+    import time
+    data     = await request.json()
+    email    = (data.get("email") or "").strip().lower()
+    otp      = (data.get("otp") or "").strip()
+    new_pw   = (data.get("new_password") or "").strip()
+
+    if not email or not otp or not new_pw:
+        raise HTTPException(400, "Thiếu thông tin")
+    if len(new_pw) < 6:
+        raise HTTPException(400, "Mật khẩu phải ≥ 6 ký tự")
+
+    record = otp_store.get(email)
+    if not record:
+        raise HTTPException(400, "OTP không hợp lệ hoặc đã hết hạn")
+    if time.time() > record["expires"]:
+        otp_store.pop(email, None)
+        raise HTTPException(400, "OTP đã hết hạn")
+    if record["otp"] != otp:
+        raise HTTPException(400, "OTP không đúng")
+
+    users    = load_users()
+    username = record["username"]
+    if username not in users:
+        raise HTTPException(404, "Tài khoản không tồn tại")
+
+    users[username]["password"]       = hash_pw(new_pw)
+    users[username]["password_plain"] = new_pw
+    save_users(users)
+    otp_store.pop(email, None)
+
+    asyncio.create_task(send_telegram(
+        f"🔑 <b>Đặt lại mật khẩu</b>\n👤 <code>{username}</code>\n📧 {email}"
+    ))
+
+    return JSONResponse({"ok": True, "msg": "Đặt lại mật khẩu thành công!"})
 
 @app.get("/api/history")
 async def get_history(request: Request):
