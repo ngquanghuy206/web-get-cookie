@@ -235,12 +235,21 @@ def send_otp_email(to_email: str, otp: str, username: str):
 </body></html>"""
     msg.attach(MIMEText(html, "html"))
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as s:
+            s.ehlo()
+            s.starttls()
+            s.ehlo()
             s.login(SMTP_EMAIL, SMTP_PASSWORD)
-            s.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+            s.send_message(msg)
         return True
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"SMTP auth failed (check app password): {e}")
+        return False
+    except TimeoutError as e:
+        print(f"SMTP timeout: {e}")
+        return False
     except Exception as e:
-        print(f"SMTP error: {e}")
+        print(f"SMTP error: {type(e).__name__}: {e}")
         return False
 
 @app.post("/api/forgot-password")
@@ -265,7 +274,13 @@ async def forgot_password(request: Request):
     import time
     otp_store[email] = {"otp": otp, "expires": time.time() + 300, "username": user_found}
 
-    sent = await asyncio.get_event_loop().run_in_executor(None, send_otp_email, email, otp, user_found)
+    try:
+        sent = await asyncio.wait_for(
+            asyncio.get_event_loop().run_in_executor(None, send_otp_email, email, otp, user_found),
+            timeout=20.0
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(500, "Gửi email timeout, vui lòng thử lại sau")
     if not sent:
         raise HTTPException(500, "Không thể gửi email, vui lòng thử lại")
 
