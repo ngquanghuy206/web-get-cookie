@@ -355,17 +355,33 @@ async def login_qr(options=None, callback=None):
 
         user_info_data = user_info_json["data"]["info"]
         
-        display_name = user_info_data.get("displayName")
-        if not display_name:
-            display_name = user_info_data.get("name", "N/A")
-        
-        user_id = user_info_data.get("userId")
-        if not user_id:
-            user_id = user_info_data.get("id", "N/A")
-        
-        phone = user_info_data.get("phoneNumber")
-        if not phone:
-            phone = user_info_data.get("phone", "N/A")
+        display_name = (
+            user_info_data.get("displayName")
+            or user_info_data.get("name")
+            or "N/A"
+        )
+
+        user_id = (
+            user_info_data.get("userId")
+            or user_info_data.get("uid")
+            or user_info_data.get("id")
+            or "N/A"
+        )
+
+        phone = (
+            user_info_data.get("phoneNumber")
+            or user_info_data.get("phone")
+            or user_info_data.get("phone_number")
+            or user_info_data.get("msisdn")
+            or user_info_data.get("mobile")
+            or "N/A"
+        )
+
+        # Fallback: thử lấy phone từ cookie zmscore / zlogin_session nếu có
+        if phone == "N/A":
+            raw_phone = cookie_dict.get("zac1") or cookie_dict.get("zac2") or ""
+            if raw_phone.lstrip("+").isdigit() and len(raw_phone.lstrip("+")) >= 9:
+                phone = raw_phone
         
         return {
             "cookies": cookie_dict,

