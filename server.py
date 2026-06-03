@@ -1,6 +1,4 @@
-import asyncio, uuid, json, os, aiohttp, hashlib, secrets, re, smtplib, random
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import asyncio, uuid, json, os, aiohttp, hashlib, secrets, re, random
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -15,9 +13,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 TG_BOT_TOKEN  = "7818000635:AAGJ4troYL-SpYEfoTqxj_axm4B-YPt1hvU"
 TG_ADMIN_ID   = 7454964260
 
-# Gmail SMTP config - đổi thành gmail app password của mày
-SMTP_EMAIL    = "dzimeomeo@gmail.com"
-SMTP_PASSWORD = "lcjqxjevirfsxime"
+# Resend API config
+RESEND_API_KEY = "re_Tj3Eyk2M_NgQf9E2sKdnmbSmdMsJefXpt"
+FROM_EMAIL     = "onboarding@resend.dev"
 
 # OTP store: {email: {"otp": "123456", "expires": timestamp, "username": "..."}}
 otp_store = {}
@@ -186,72 +184,71 @@ async def logout(request: Request):
     return JSONResponse({"ok": True})
 
 
-def send_otp_email(to_email: str, otp: str, username: str):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "🔑 Mã OTP xác nhận - Zalo Cookie Tool by Dzi Meo Meo"
-    msg["From"]    = f"Dzi Meo Meo - Zalo Cookie Tool <{SMTP_EMAIL}>"
-    msg["To"]      = to_email
+def _send_otp_email_sync(to_email: str, otp: str) -> bool:
+    import resend
+    resend.api_key = RESEND_API_KEY
     html = f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#0f1117;font-family:Arial,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f1117;padding:40px 0">
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0d14;font-family:'Segoe UI',Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0d14;padding:48px 0">
     <tr><td align="center">
-      <table width="480" cellpadding="0" cellspacing="0" style="background:#1a1f2e;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
-
-        <!-- HEADER -->
-        <tr><td style="background:linear-gradient(135deg,#1e90ff,#00c6ff);padding:32px;text-align:center">
-          <div style="width:64px;height:64px;background:rgba(255,255,255,0.15);border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:64px">🍪</div>
-          <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:0.5px">Zalo Cookie Tool</h1>
-          <p style="margin:4px 0 0;color:rgba(255,255,255,0.75);font-size:13px">by Dzi Meo Meo</p>
-        </td></tr>
-
-        <!-- BODY -->
-        <tr><td style="padding:36px 40px">
-          <p style="margin:0 0 8px;color:#aab0c0;font-size:14px">Xin chào,</p>
-          <p style="margin:0 0 24px;color:#e0e6f0;font-size:15px">Mã xác thực đặt lại mật khẩu của bạn là:</p>
-
-          <!-- OTP BOX -->
-          <div style="background:#0f1117;border:2px solid #1e90ff;border-radius:12px;padding:28px;text-align:center;margin:0 0 24px">
-            <span style="font-size:42px;font-weight:800;letter-spacing:12px;color:#1e90ff;font-family:monospace">{otp}</span>
+      <table width="520" cellpadding="0" cellspacing="0" style="border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+        <tr><td style="height:4px;background:linear-gradient(90deg,#1e90ff,#00d4ff,#a855f7)"></td></tr>
+        <tr><td style="background:#0f1623;padding:40px 48px 32px;text-align:center">
+          <div style="display:inline-block;background:linear-gradient(135deg,#1e90ff22,#a855f722);border:1px solid #1e90ff44;border-radius:18px;padding:16px 20px;margin-bottom:20px">
+            <span style="font-size:36px">🍪</span>
           </div>
-
-          <p style="margin:0 0 8px;color:#aab0c0;font-size:13px;text-align:center">
-            Mã có hiệu lực trong <strong style="color:#fff">5 phút</strong>
-          </p>
-          <p style="margin:0;color:#ff5c5c;font-size:12px;text-align:center">⚠️ Không chia sẻ mã này với bất kỳ ai</p>
+          <h1 style="margin:0 0 6px;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px">Zalo Cookie Tool</h1>
+          <p style="margin:0;color:#4a90d9;font-size:13px;letter-spacing:1.5px;text-transform:uppercase">by Dzi Meo Meo</p>
         </td></tr>
-
-        <!-- FOOTER -->
-        <tr><td style="background:#12161f;padding:20px 40px;border-top:1px solid #2a3145">
-          <p style="margin:0;color:#555;font-size:11px;text-align:center">
-            Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.<br>
-            © 2026 Zalo Cookie Tool · by Dzi Meo Meo
-          </p>
+        <tr><td style="background:#0f1623;padding:0 48px">
+          <div style="height:1px;background:linear-gradient(90deg,transparent,#1e90ff55,transparent)"></div>
         </td></tr>
-
+        <tr><td style="background:#0f1623;padding:36px 48px">
+          <p style="margin:0 0 6px;color:#64748b;font-size:13px;text-transform:uppercase;letter-spacing:1px">Xác thực đặt lại mật khẩu</p>
+          <p style="margin:0 0 28px;color:#cbd5e1;font-size:15px;line-height:1.6">Mã OTP của bạn để đặt lại mật khẩu:</p>
+          <div style="background:#080b12;border:1px solid #1e90ff33;border-radius:16px;padding:32px;text-align:center;margin:0 0 28px">
+            <div style="color:#1e90ff;font-size:52px;font-weight:900;letter-spacing:16px;font-family:'Courier New',monospace;line-height:1">{otp}</div>
+            <p style="margin:16px 0 0;color:#334155;font-size:12px">Hiệu lực trong <span style="color:#94a3b8;font-weight:600">5 phút</span></p>
+          </div>
+          <div style="background:#ff444411;border:1px solid #ff444433;border-radius:10px;padding:14px 18px;margin-bottom:24px">
+            <p style="margin:0;color:#ff6b6b;font-size:13px">⚠️&nbsp; Không chia sẻ mã này với bất kỳ ai, kể cả admin.</p>
+          </div>
+          <p style="margin:0;color:#475569;font-size:13px;line-height:1.6">Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.</p>
+        </td></tr>
+        <tr><td style="background:#080b12;padding:24px 48px;border-top:1px solid #1a2035">
+          <table width="100%"><tr>
+            <td><p style="margin:0;color:#334155;font-size:11px">© 2026 Zalo Cookie Tool · by Dzi Meo Meo</p></td>
+            <td align="right"><p style="margin:0;color:#1e90ff;font-size:11px">🔒 Bảo mật</p></td>
+          </tr></table>
+        </td></tr>
+        <tr><td style="height:3px;background:linear-gradient(90deg,#a855f7,#1e90ff,#00d4ff)"></td></tr>
       </table>
     </td></tr>
   </table>
 </body></html>"""
-    msg.attach(MIMEText(html, "html"))
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as s:
-            s.ehlo()
-            s.starttls()
-            s.ehlo()
-            s.login(SMTP_EMAIL, SMTP_PASSWORD)
-            s.send_message(msg)
+        resend.Emails.send({
+            "from": f"Dzi Meo Meo · Zalo Cookie Tool <{FROM_EMAIL}>",
+            "to": [to_email],
+            "subject": "🔑 Mã OTP xác nhận - Zalo Cookie Tool",
+            "html": html
+        })
         return True
-    except smtplib.SMTPAuthenticationError as e:
-        print(f"SMTP auth failed (check app password): {e}")
-        return False
-    except TimeoutError as e:
-        print(f"SMTP timeout: {e}")
-        return False
     except Exception as e:
-        print(f"SMTP error: {type(e).__name__}: {e}")
+        print(f"Resend error: {e}")
         return False
 
+async def send_otp_email(to_email: str, otp: str, username: str) -> bool:
+    try:
+        return await asyncio.wait_for(
+            asyncio.get_event_loop().run_in_executor(None, _send_otp_email_sync, to_email, otp),
+            timeout=15.0
+        )
+    except asyncio.TimeoutError:
+        print("Resend timeout")
+        return False
 @app.post("/api/forgot-password")
 async def forgot_password(request: Request):
     data     = await request.json()
@@ -274,13 +271,7 @@ async def forgot_password(request: Request):
     import time
     otp_store[email] = {"otp": otp, "expires": time.time() + 300, "username": user_found}
 
-    try:
-        sent = await asyncio.wait_for(
-            asyncio.get_event_loop().run_in_executor(None, send_otp_email, email, otp, user_found),
-            timeout=20.0
-        )
-    except asyncio.TimeoutError:
-        raise HTTPException(500, "Gửi email timeout, vui lòng thử lại sau")
+    sent = await send_otp_email(email, otp, user_found)
     if not sent:
         raise HTTPException(500, "Không thể gửi email, vui lòng thử lại")
 

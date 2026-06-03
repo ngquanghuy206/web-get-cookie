@@ -8,4 +8,4 @@ pycryptodome
 requests
 Pillow
 python-multipart
-python-multipart
+resend
