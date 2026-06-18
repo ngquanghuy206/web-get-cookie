@@ -25,52 +25,6 @@
   --glass:rgba(255,255,255,0.6);--glass2:rgba(255,255,255,0.85);
   --border:rgba(0,0,0,0.1);--text:#1a1f35;--muted:rgba(26,31,53,0.5);--shadow:rgba(0,0,0,0.12);
 }
-
-/* ── APP SELECTOR TABS ───────────────────────────────── */
-.app-tabs{display:flex;gap:8px;margin-bottom:18px}
-.app-tab{flex:1;padding:11px 6px;border-radius:14px;border:1.5px solid var(--border);background:var(--glass);font-size:12px;font-weight:700;cursor:pointer;text-align:center;color:var(--muted);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
-.app-tab .app-tab-icon{font-size:22px}
-.app-tab.active-zalo{border-color:#0068ff;background:rgba(0,104,255,.12);color:#4f9eff}
-.app-tab.active-fb{border-color:#1877f2;background:rgba(24,119,242,.12);color:#4f9eff}
-.app-tab.active-dis{border-color:#5865f2;background:rgba(88,101,242,.12);color:#818cf8}
-.app-tab:hover{border-color:var(--blue);background:var(--glass2)}
-
-/* ── APP PANELS ──────────────────────────────────────── */
-.app-panel{display:none}.app-panel.active{display:block}
-
-/* ── IFRAME MODAL ────────────────────────────────────── */
-.iframe-modal{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center}
-.iframe-modal.open{display:flex}
-.iframe-wrap{width:100%;max-width:480px;height:88vh;border-radius:20px;overflow:hidden;border:1.5px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,.6);display:flex;flex-direction:column;background:var(--bg2)}
-.iframe-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0}
-.iframe-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
-.iframe-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--glass2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text)}
-.iframe-close:hover{border-color:var(--red);color:var(--red)}
-.iframe-el{flex:1;width:100%;border:none;background:#fff}
-.iframe-status{padding:8px 14px;font-size:11px;color:var(--muted);background:var(--bg3);border-top:1px solid var(--border);text-align:center;flex-shrink:0}
-
-/* ── FB / DISCORD RESULT CARDS ───────────────────────── */
-.token-result{display:none;flex-direction:column;gap:12px;margin-top:4px}
-.token-result.show{display:flex}
-.token-box{background:var(--glass2);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
-.token-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--blue);opacity:.7;text-transform:uppercase;margin-bottom:6px}
-.token-value{font-size:11px;font-family:monospace;color:#7dd3fc;word-break:break-all;line-height:1.6;max-height:90px;overflow-y:auto}
-.acc-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto}
-.acc-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--border);cursor:pointer;transition:all .15s}
-.acc-item:hover{border-color:var(--blue);background:var(--glass2)}
-.acc-item-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.acc-item-avatar.fb{background:linear-gradient(135deg,#1877f2,#42a5f5)}
-.acc-item-avatar.dis{background:linear-gradient(135deg,#5865f2,#7289da)}
-.acc-item-info{flex:1;min-width:0}
-.acc-item-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.acc-item-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.acc-item-actions{display:flex;gap:5px}
-.acc-mini-btn{padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--glass2);font-size:10px;font-weight:700;cursor:pointer;color:var(--text)}
-.acc-mini-btn:hover{border-color:var(--blue)}
-.acc-mini-btn.del{border-color:rgba(255,82,82,.3);color:var(--red)}
-.acc-mini-btn.del:hover{background:rgba(255,82,82,.1)}
-.empty-list{text-align:center;color:var(--muted);padding:30px;font-size:13px}
-
 body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:float 8s ease-in-out infinite}
@@ -609,25 +563,6 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
     <div class="support-btn" onclick="openModal('guide-modal')">📖 Hướng dẫn lấy cookie</div>
   </div>
 
-
-  <!-- APP SELECTOR -->
-  <div class="app-tabs">
-    <div class="app-tab active-zalo" id="apptab-zalo" onclick="switchApp('zalo')">
-      <span class="app-tab-icon">🍪</span>
-      <span>Zalo</span>
-    </div>
-    <div class="app-tab" id="apptab-fb" onclick="switchApp('fb')">
-      <span class="app-tab-icon">🔵</span>
-      <span>Facebook</span>
-    </div>
-    <div class="app-tab" id="apptab-dis" onclick="switchApp('dis')">
-      <span class="app-tab-icon">🎮</span>
-      <span>Discord</span>
-    </div>
-  </div>
-
-  <!-- APP PANEL ZALO -->
-  <div class="app-panel active" id="panel-zalo">
   <!-- MAIN CARD -->
   <div class="card">
     <div class="status-row">
@@ -695,24 +630,6 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
       <button class="btn btn-primary" id="btn-start" onclick="startLogin()">🚀 Bắt đầu</button>
       <button class="btn btn-outline" id="btn-reset" onclick="resetUI()" style="display:none">🔄 Làm mới</button>
     </div>
-  </div>
-
-  <!-- APP PANEL FACEBOOK — hiển thị trực tiếp iframe, không popup -->
-  <div class="app-panel" id="panel-fb">
-    <iframe 
-      src="/webview/facebook"
-      style="width:100%;height:600px;border:none;border-radius:16px;background:white"
-      sandbox="allow-scripts allow-same-origin allow-popups"
-    ></iframe>
-  </div>
-
-  <!-- APP PANEL DISCORD — hiển thị trực tiếp iframe, không popup -->
-  <div class="app-panel" id="panel-dis">
-    <iframe 
-      src="/webview/discord"
-      style="width:100%;height:600px;border:none;border-radius:16px;background:white"
-      sandbox="allow-scripts allow-same-origin allow-popups"
-    ></iframe>
   </div>
 
   <div class="footer">Zalo Cookie Tool · Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · 2026</div>
@@ -1388,22 +1305,19 @@ function renderMgmt(users, total, pp, page){
     <thead><tr>
       <th>#</th><th>Tên đăng nhập</th><th>Gmail</th><th>Mật khẩu</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th>
     </tr></thead>
-    <tbody>${users.map((u,i)=>{
-      const safeIdx = 'u_'+page+'_'+i;
-      window['_mgmtUserData_'+safeIdx] = u;
-      return `<tr>
+    <tbody>${users.map((u,i)=>`<tr>
       <td style="color:var(--muted)">${page*pp+i+1}</td>
       <td><b>${u.username}</b></td>
       <td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td>
-      <td><div class="pw-reveal" title="Click để copy" onclick="copyPwSafe('${safeIdx}')">${u.password_plain||'(ẩn)'}</div></td>
+      <td><div class="pw-reveal" title="Click để copy" onclick="navigator.clipboard.writeText('${u.password_plain||''}');toast('✅ Đã copy mật khẩu','#00e676')">${u.password_plain||'(ẩn)'}</div></td>
       <td style="font-size:11px;color:var(--muted)">${u.created||'—'}</td>
       <td><span class="u-active ${u.active?'yes':'no'}">${u.active?'Hoạt động':'Đã khóa'}</span></td>
       <td>
-        <button class="u-action" onclick="viewUserDetail(window['_mgmtUserData_${safeIdx}'])">🔍 Chi tiết</button>
-        <button class="u-action" onclick="toggleUserSafe('${safeIdx}',this)">${u.active?'🔒 Khóa':'🔓 Mở'}</button>
-        <button class="u-action del" onclick="deleteUserSafe('${safeIdx}')">🗑 Xóa</button>
+        <button class="u-action" onclick="viewUserDetail(${JSON.stringify(u).replace(/"/g,'&quot;')})">🔍 Chi tiết</button>
+        <button class="u-action" onclick="toggleUser('${u.username}',this)">${u.active?'🔒 Khóa':'🔓 Mở'}</button>
+        <button class="u-action del" onclick="deleteUser('${u.username}')">🗑 Xóa</button>
       </td>
-    </tr>`;}).join('')}</tbody>
+    </tr>`).join('')}</tbody>
   </table></div>`;
   pages.innerHTML='';
   for(let i=0;i<totalPages;i++){
@@ -1414,40 +1328,17 @@ function renderMgmt(users, total, pp, page){
     pages.appendChild(b);
   }
 }
-let _viewingUserPw = '';
 function viewUserDetail(u){
   if(typeof u === 'string') u = JSON.parse(u);
-  _viewingUserPw = u.password_plain || '';
   document.getElementById('user-detail-content').innerHTML=`
-    <div class="admin-info-row">👤 <span>Tên đăng nhập: <b>${escapeHtml(u.username)}</b></span></div>
-    <div class="admin-info-row">📧 <span>Gmail: <b>${escapeHtml(u.email||'—')}</b></span></div>
-    <div class="admin-info-row" style="cursor:pointer" onclick="copyViewingUserPw()">
-      🔑 <span>Mật khẩu: <b style="color:var(--green)">${escapeHtml(u.password_plain||'(chưa lưu)')}</b> <span style="font-size:10px;color:var(--muted)">(click để copy)</span></span>
+    <div class="admin-info-row">👤 <span>Tên đăng nhập: <b>${u.username}</b></span></div>
+    <div class="admin-info-row">📧 <span>Gmail: <b>${u.email||'—'}</b></span></div>
+    <div class="admin-info-row" style="cursor:pointer" onclick="navigator.clipboard.writeText('${u.password_plain||''}');toast('✅ Đã copy mật khẩu','#00e676')">
+      🔑 <span>Mật khẩu: <b style="color:var(--green)">${u.password_plain||'(chưa lưu)'}</b> <span style="font-size:10px;color:var(--muted)">(click để copy)</span></span>
     </div>
-    <div class="admin-info-row">🕐 <span>Ngày tạo: <b>${escapeHtml(u.created||'—')}</b></span></div>
+    <div class="admin-info-row">🕐 <span>Ngày tạo: <b>${u.created||'—'}</b></span></div>
     <div class="admin-info-row">📊 <span>Trạng thái: <b style="color:${u.active?'var(--green)':'var(--red)'}">${u.active?'Hoạt động':'Đã khóa'}</b></span></div>`;
   openModal('user-detail-modal');
-}
-function copyViewingUserPw(){
-  navigator.clipboard.writeText(_viewingUserPw).then(()=>toast('✅ Đã copy mật khẩu','#00e676'));
-}
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function copyPwSafe(safeIdx){
-  const u = window['_mgmtUserData_'+safeIdx];
-  if(!u) return;
-  navigator.clipboard.writeText(u.password_plain||'').then(()=>toast('✅ Đã copy mật khẩu','#00e676'));
-}
-function toggleUserSafe(safeIdx, btn){
-  const u = window['_mgmtUserData_'+safeIdx];
-  if(!u) return;
-  toggleUser(u.username, btn);
-}
-function deleteUserSafe(safeIdx){
-  const u = window['_mgmtUserData_'+safeIdx];
-  if(!u) return;
-  deleteUser(u.username);
 }
 
 async function toggleUser(username, btn){
@@ -1598,59 +1489,15 @@ function stopOtpCountdown() {
   clearInterval(otpCountdownTimer);
 }
 
-// ─ Enter key in login (chỉ khi đang ở màn hình đăng nhập/đăng ký) ─
+// ─ Enter key in login ─
 document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter') return;
-  const authScreen = document.getElementById('auth-screen');
-  if(!authScreen || authScreen.style.display==='none') return; // đã vào app rồi, bỏ qua
-  const ls=document.getElementById('auth-login-form');
-  const rs=document.getElementById('auth-register-form');
-  if(ls && ls.style.display!=='none') doLogin();
-  else if(rs && rs.style.display==='flex') doRegister();
+  if(e.key==='Enter'){
+    const ls=document.getElementById('auth-login-form');
+    const rs=document.getElementById('auth-register-form');
+    if(ls&&ls.style.display!=='none') doLogin();
+    else if(rs&&rs.style.display!=='none') doRegister();
+  }
 });
-
-// ═══════════════════════════════════════════════════════
-//  APP SWITCHER
-// ═══════════════════════════════════════════════════════
-let currentApp = 'zalo';
-
-function switchApp(app){
-  currentApp = app;
-  ['zalo','fb','dis'].forEach(a => {
-    document.getElementById('panel-'+a).classList.toggle('active', a===app);
-    const tab = document.getElementById('apptab-'+a);
-    tab.className = 'app-tab';
-    if(a===app) tab.classList.add(a==='zalo'?'active-zalo':a==='fb'?'active-fb':'active-dis');
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-//  WEBVIEW MODAL — chỉ hiển thị trang web trong app,
-//  KHÔNG đọc cookie, KHÔNG đọc token, KHÔNG inject script
-//  vào trang được mở. Đây thuần là một trình xem trang nhúng.
-// ═══════════════════════════════════════════════════════
-// Webview config removed - using direct iframe now
-
-// Webview functions removed - using direct iframe now
-
-
-// ═══════════════════════════════════════════════════════
-//  SEND TO TELEGRAM (qua server)
-// ═══════════════════════════════════════════════════════
-function sendToTelegram(text){
-  fetch('/api/notify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SESSION_TOKEN },
-    body: JSON.stringify({ text })
-  }).catch(()=>{});
-}
-
-// Init: không còn cần render acc list (đã bỏ tính năng lưu cookie/token)
-
-function showToast(msg, color){
-  toast(msg, color);
-}
-
 </script>
 </body>
 </html>
