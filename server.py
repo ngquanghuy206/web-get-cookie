@@ -528,70 +528,127 @@ async def webview_proxy(url: str):
 
 @app.get("/webview/facebook")
 async def webview_facebook():
-    """Mở Facebook trong webview"""
-    try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1"
-        }
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://m.facebook.com/", headers=headers, timeout=aiohttp.ClientTimeout(total=10), ssl=False) as resp:
-                content = await resp.text()
-                return Response(
-                    content=content,
-                    media_type="text/html",
-                    headers={
-                        "X-Frame-Options": "ALLOWALL",
-                        "Cache-Control": "no-cache",
-                        "Content-Type": "text/html; charset=utf-8"
-                    }
-                )
-    except Exception as e:
-        html = """
-        <html>
-        <head><meta charset="UTF-8"><title>Facebook</title></head>
-        <body style="background:#fff;color:#333;font-family:sans-serif;padding:20px;text-align:center">
-            <h2>🔐 Facebook đăng nhập</h2>
-            <p>Vui lòng đăng nhập Facebook tại đây:</p>
-            <a href="https://m.facebook.com/" target="_blank" style="display:inline-block;padding:12px 24px;background:#1877f2;color:white;text-decoration:none;border-radius:6px;font-weight:bold">Mở Facebook</a>
-        </body>
-        </html>
-        """
-        return Response(content=html, media_type="text/html")
+    """Mở Facebook - fallback page vì Facebook block proxy"""
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Facebook</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                padding: 20px;
+            }
+            .container {
+                background: white;
+                border-radius: 16px;
+                padding: 40px;
+                text-align: center;
+                max-width: 400px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+            .icon { font-size: 60px; margin-bottom: 20px; }
+            h1 { color: #1877f2; margin-bottom: 10px; font-size: 24px; }
+            p { color: #65676b; margin-bottom: 30px; line-height: 1.5; }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: #1877f2;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: background 0.3s;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .btn:hover { background: #165ee0; }
+            .note { font-size: 12px; color: #8a8d91; margin-top: 20px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="icon">📱</div>
+            <h1>Facebook</h1>
+            <p>Mở Facebook trong tab mới để sử dụng đầy đủ tính năng</p>
+            <a href="https://m.facebook.com/" target="_blank" class="btn">Mở Facebook</a>
+            <p class="note">Facebook không hỗ trợ nhúng trong iframe</p>
+        </div>
+    </body>
+    </html>
+    """
+    return Response(content=html, media_type="text/html")
 
 @app.get("/webview/discord")
 async def webview_discord():
-    """Mở Discord trong webview"""
-    try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        }
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://discord.com/app", headers=headers, timeout=aiohttp.ClientTimeout(total=10), ssl=False) as resp:
-                content = await resp.text()
-                if len(content) < 1000:  # Discord returns minimal content for bot requests
-                    raise Exception("Discord returned minimal content")
-                return Response(
-                    content=content,
-                    media_type="text/html",
-                    headers={
-                        "X-Frame-Options": "ALLOWALL",
-                        "Cache-Control": "no-cache",
-                        "Content-Type": "text/html; charset=utf-8"
-                    }
-                )
-    except Exception as e:
-        html = """
-        <html>
-        <head><meta charset="UTF-8"><title>Discord</title></head>
-        <body style="background:#fff;color:#333;font-family:sans-serif;padding:20px;text-align:center">
-            <h2>⚠️ Discord Web</h2>
-            <p>Discord không hỗ trợ mở trong iframe</p>
-            <p>Mở Discord ở tab mới để dùng</p>
-            <a href="https://discord.com/app" target="_blank" style="display:inline-block;padding:12px 24px;background:#5865f2;color:white;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:10px">Mở Discord</a>
-        </body>
-        </html>
-        """
-        return Response(content=html, media_type="text/html")
+    """Mở Discord - fallback page vì Discord block iframe"""
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Discord</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+                background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+                padding: 20px;
+            }
+            .container {
+                background: white;
+                border-radius: 16px;
+                padding: 40px;
+                text-align: center;
+                max-width: 400px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+            .icon { font-size: 60px; margin-bottom: 20px; }
+            h1 { color: #5865f2; margin-bottom: 10px; font-size: 24px; }
+            p { color: #72767d; margin-bottom: 30px; line-height: 1.5; }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: #5865f2;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: background 0.3s;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .btn:hover { background: #4752c4; }
+            .note { font-size: 12px; color: #949ba4; margin-top: 20px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="icon">🎮</div>
+            <h1>Discord</h1>
+            <p>Mở Discord trong tab mới để trò chuyện</p>
+            <a href="https://discord.com/app" target="_blank" class="btn">Mở Discord</a>
+            <p class="note">Discord không hỗ trợ nhúng trong iframe</p>
+        </div>
+    </body>
+    </html>
+    """
+    return Response(content=html, media_type="text/html")
 
 
 if __name__ == "__main__":
