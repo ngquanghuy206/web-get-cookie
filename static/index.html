@@ -696,6 +696,117 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
 
   <div class="footer">Zalo Cookie Tool · Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · 2026</div>
 </div>
+  </div><!-- /panel-zalo -->
+
+  <!-- ══ APP PANEL FACEBOOK ══ -->
+  <div class="app-panel" id="panel-fb">
+    <div class="card">
+      <div class="status-row">
+        <div class="dot" id="dot-fb"></div>
+        <span id="status-fb">Nhấn Bắt đầu để đăng nhập Facebook và lấy Cookie</span>
+      </div>
+
+      <div class="acc-list" id="fb-acc-list" style="margin-bottom:12px"></div>
+
+      <div class="token-result" id="fb-result">
+        <div class="acc-card">
+          <div class="avatar-circle" style="background:linear-gradient(135deg,#1877f2,#42a5f5)">🔵</div>
+          <div>
+            <div class="acc-name" id="fb-res-name">—</div>
+            <div class="acc-sub" id="fb-res-time">🕐 —</div>
+          </div>
+        </div>
+        <div class="token-box">
+          <div class="token-label">Cookie String</div>
+          <div class="token-value" id="fb-cookie-val">—</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="copyFbCookie()">📋 Copy Cookie</button>
+          <button class="btn btn-outline" onclick="downloadFbCookie()">⬇️ Tải .txt</button>
+          <button class="btn btn-outline" onclick="saveFbAcc()">💾 Lưu Acc</button>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-primary" id="btn-fb-start" onclick="startFbLogin()" style="background:linear-gradient(135deg,#1877f2,#42a5f5)">🔵 Bắt đầu đăng nhập FB</button>
+        <button class="btn btn-outline" onclick="clearFbAccs()">🗑 Xóa tất cả</button>
+      </div>
+
+      <!-- IFRAME INLINE FB -->
+      <div class="iframe-inline-wrap" id="fb-iframe-wrap">
+        <div class="iframe-topbar">
+          <div class="iframe-title"><span>🔵</span><span>Facebook — Đăng nhập để lấy Cookie</span></div>
+          <div style="font-size:11px;color:var(--muted)">Đăng nhập xong bấm nút lấy cookie</div>
+        </div>
+        <iframe id="fb-iframe" class="iframe-el"
+          src="about:blank"
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation allow-modals">
+        </iframe>
+        <div class="iframe-status" id="fb-iframe-status">⏳ Đang tải Facebook...</div>
+        <div id="fb-get-btn-wrap" style="display:none;padding:10px 14px;background:var(--bg3);border-top:1px solid var(--border);gap:8px;align-items:center;justify-content:center">
+          <button onclick="grabFbCookie()" style="flex:1;padding:10px;background:linear-gradient(135deg,#1877f2,#42a5f5);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">
+            🍪 Lấy Cookie Facebook
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /panel-fb -->
+
+  <!-- ══ APP PANEL DISCORD ══ -->
+  <div class="app-panel" id="panel-dis">
+    <div class="card">
+      <div class="status-row">
+        <div class="dot" id="dot-dis"></div>
+        <span id="status-dis">Nhấn Bắt đầu để đăng nhập Discord và lấy Token</span>
+      </div>
+
+      <div class="acc-list" id="dis-acc-list" style="margin-bottom:12px"></div>
+
+      <div class="token-result" id="dis-result">
+        <div class="acc-card">
+          <div class="avatar-circle" style="background:linear-gradient(135deg,#5865f2,#7289da)">🎮</div>
+          <div>
+            <div class="acc-name" id="dis-res-name">—</div>
+            <div class="acc-sub" id="dis-res-time">🕐 —</div>
+          </div>
+        </div>
+        <div class="token-box">
+          <div class="token-label">Discord Token</div>
+          <div class="token-value" id="dis-token-val">—</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="copyDisToken()">📋 Copy Token</button>
+          <button class="btn btn-outline" onclick="downloadDisToken()">⬇️ Tải .txt</button>
+          <button class="btn btn-outline" onclick="saveDisAcc()">💾 Lưu Acc</button>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-primary" id="btn-dis-start" onclick="startDisLogin()" style="background:linear-gradient(135deg,#5865f2,#7289da)">🎮 Bắt đầu đăng nhập Discord</button>
+        <button class="btn btn-outline" onclick="clearDisAccs()">🗑 Xóa tất cả</button>
+      </div>
+
+      <!-- IFRAME INLINE DISCORD -->
+      <div class="iframe-inline-wrap" id="dis-iframe-wrap">
+        <div class="iframe-topbar">
+          <div class="iframe-title"><span>🎮</span><span>Discord — Đăng nhập để lấy Token</span></div>
+          <div style="font-size:11px;color:var(--muted)">Đăng nhập xong bấm nút lấy token</div>
+        </div>
+        <iframe id="dis-iframe" class="iframe-el"
+          src="about:blank"
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-top-navigation allow-modals">
+        </iframe>
+        <div class="iframe-status" id="dis-iframe-status">⏳ Đang tải Discord...</div>
+        <div id="dis-get-btn-wrap" style="display:none;padding:10px 14px;background:var(--bg3);border-top:1px solid var(--border);gap:8px;align-items:center;justify-content:center">
+          <button onclick="grabDisToken()" style="flex:1;padding:10px;background:linear-gradient(135deg,#5865f2,#7289da);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">
+            🔑 Lấy Token Discord
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /panel-dis -->
+
+</div>
 </div><!-- /#app-screen -->
 
 <script>
