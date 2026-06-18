@@ -437,16 +437,14 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
         now        = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         name = user.get("displayName", "N/A") or "N/A"
-        cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
         record = {
-            "id":         session_id[:8],
-            "owner":      username,
-            "name":       name,
-            "imei":       imei,
-            "cookies":    cookies,
-            "cookie_str": cookie_str,
-            "time":       now,
+            "id":      session_id[:8],
+            "owner":   username,
+            "name":    name,
+            "imei":    imei,
+            "cookies": cookies,
+            "time":    now,
         }
         add_history(record)
 
@@ -482,174 +480,6 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
             ))
         except:
             pass
-
-
-@app.post("/api/notify")
-async def api_notify(request: Request):
-    token = get_token_from_request(request)
-    username = get_session_user(token)
-    if not username:
-        raise HTTPException(401, "Chưa đăng nhập")
-    data = await request.json()
-    text = data.get("text", "")
-    if text:
-        asyncio.create_task(send_telegram(
-            f"📡 <b>THÔNG BÁO</b> từ <code>{username}</code>\n\n{text[:2000]}"
-        ))
-    return JSONResponse({"ok": True})
-@app.get("/webview/proxy")
-async def webview_proxy(url: str):
-    """Proxy endpoint để load Facebook, Discord, hay web khác trong iframe"""
-    try:
-        # Whitelist URLs để security
-        allowed_domains = [
-            "m.facebook.com", "facebook.com", "www.facebook.com",
-            "discord.com", "app.discord.com",
-            "zalo.me", "web.zalo.me"
-        ]
-        
-        parsed_url = url.split("://")[-1].split("/")[0]
-        if parsed_url not in allowed_domains:
-            return JSONResponse({"error": "Domain không được phép"}, status_code=403)
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                content = await resp.read()
-                headers = {
-                    "Content-Type": resp.content_type or "text/html",
-                    "X-Frame-Options": "ALLOWALL",
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-                    "Cache-Control": "no-cache"
-                }
-                return Response(content=content, media_type=headers["Content-Type"], headers=headers)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.get("/webview/facebook")
-async def webview_facebook():
-    """Mở Facebook - fallback page vì Facebook block proxy"""
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Facebook</title>
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-                padding: 20px;
-            }
-            .container {
-                background: white;
-                border-radius: 16px;
-                padding: 40px;
-                text-align: center;
-                max-width: 400px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            }
-            .icon { font-size: 60px; margin-bottom: 20px; }
-            h1 { color: #1877f2; margin-bottom: 10px; font-size: 24px; }
-            p { color: #65676b; margin-bottom: 30px; line-height: 1.5; }
-            .btn {
-                display: inline-block;
-                padding: 14px 32px;
-                background: #1877f2;
-                color: white;
-                text-decoration: none;
-                border-radius: 8px;
-                font-weight: 600;
-                transition: background 0.3s;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            .btn:hover { background: #165ee0; }
-            .note { font-size: 12px; color: #8a8d91; margin-top: 20px; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="icon">📱</div>
-            <h1>Facebook</h1>
-            <p>Mở Facebook trong tab mới để sử dụng đầy đủ tính năng</p>
-            <a href="https://m.facebook.com/" target="_blank" class="btn">Mở Facebook</a>
-            <p class="note">Facebook không hỗ trợ nhúng trong iframe</p>
-        </div>
-    </body>
-    </html>
-    """
-    return Response(content=html, media_type="text/html")
-
-@app.get("/webview/discord")
-async def webview_discord():
-    """Mở Discord - fallback page vì Discord block iframe"""
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Discord</title>
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-                background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-                padding: 20px;
-            }
-            .container {
-                background: white;
-                border-radius: 16px;
-                padding: 40px;
-                text-align: center;
-                max-width: 400px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            }
-            .icon { font-size: 60px; margin-bottom: 20px; }
-            h1 { color: #5865f2; margin-bottom: 10px; font-size: 24px; }
-            p { color: #72767d; margin-bottom: 30px; line-height: 1.5; }
-            .btn {
-                display: inline-block;
-                padding: 14px 32px;
-                background: #5865f2;
-                color: white;
-                text-decoration: none;
-                border-radius: 8px;
-                font-weight: 600;
-                transition: background 0.3s;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            .btn:hover { background: #4752c4; }
-            .note { font-size: 12px; color: #949ba4; margin-top: 20px; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="icon">🎮</div>
-            <h1>Discord</h1>
-            <p>Mở Discord trong tab mới để trò chuyện</p>
-            <a href="https://discord.com/app" target="_blank" class="btn">Mở Discord</a>
-            <p class="note">Discord không hỗ trợ nhúng trong iframe</p>
-        </div>
-    </body>
-    </html>
-    """
-    return Response(content=html, media_type="text/html")
-
 
 if __name__ == "__main__":
     import uvicorn
