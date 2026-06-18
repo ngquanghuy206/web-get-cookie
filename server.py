@@ -497,7 +497,92 @@ async def api_notify(request: Request):
             f"📡 <b>THÔNG BÁO</b> từ <code>{username}</code>\n\n{text[:2000]}"
         ))
     return JSONResponse({"ok": True})
+@app.get("/webview/proxy")
+async def webview_proxy(url: str):
+    """Proxy endpoint để load Facebook, Discord, hay web khác trong iframe"""
+    try:
+        # Whitelist URLs để security
+        allowed_domains = [
+            "m.facebook.com", "facebook.com", "www.facebook.com",
+            "discord.com", "app.discord.com",
+            "zalo.me", "web.zalo.me"
+        ]
+        
+        parsed_url = url.split("://")[-1].split("/")[0]
+        if parsed_url not in allowed_domains:
+            return JSONResponse({"error": "Domain không được phép"}, status_code=403)
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                content = await resp.read()
+                headers = {
+                    "Content-Type": resp.content_type or "text/html",
+                    "X-Frame-Options": "ALLOWALL",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                    "Cache-Control": "no-cache"
+                }
+                return Response(content=content, media_type=headers["Content-Type"], headers=headers)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
+@app.get("/webview/facebook")
+async def webview_facebook():
+    """Mở Facebook trong webview"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            # Tìm cách load m.facebook.com mà không bị X-Frame-Options chặn
+            async with session.get("https://m.facebook.com/", timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                content = await resp.text()
+                # Loại bỏ X-Frame-Options header nếu có
+                return Response(
+                    content=content,
+                    media_type="text/html",
+                    headers={
+                        "X-Frame-Options": "ALLOWALL",
+                        "Cache-Control": "no-cache"
+                    }
+                )
+    except Exception as e:
+        html = f"""
+        <html>
+        <head><meta charset="UTF-8"><title>Facebook</title></head>
+        <body style="background:#fff;color:#333;font-family:sans-serif;padding:20px;text-align:center">
+            <h2>⚠️ Không thể tải Facebook</h2>
+            <p>Thử lại sau hoặc dùng link trực tiếp</p>
+            <a href="https://m.facebook.com/" target="_blank" style="color:#1877f2">Mở Facebook tại đây</a>
+        </body>
+        </html>
+        """
+        return Response(content=html, media_type="text/html")
+
+@app.get("/webview/discord")
+async def webview_discord():
+    """Mở Discord trong webview"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://discord.com/app", timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                content = await resp.text()
+                return Response(
+                    content=content,
+                    media_type="text/html",
+                    headers={
+                        "X-Frame-Options": "ALLOWALL",
+                        "Cache-Control": "no-cache"
+                    }
+                )
+    except Exception as e:
+        html = f"""
+        <html>
+        <head><meta charset="UTF-8"><title>Discord</title></head>
+        <body style="background:#fff;color:#333;font-family:sans-serif;padding:20px;text-align:center">
+            <h2>⚠️ Không thể tải Discord</h2>
+            <p>Discord có thể không hỗ trợ iframe</p>
+            <a href="https://discord.com/app" target="_blank" style="color:#5865f2">Mở Discord tại đây</a>
+        </body>
+        </html>
+        """
+        return Response(content=html, media_type="text/html")
 
 
 if __name__ == "__main__":
