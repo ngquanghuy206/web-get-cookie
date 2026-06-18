@@ -697,50 +697,27 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
     </div>
   </div>
 
-  <!-- APP PANEL FACEBOOK — chỉ mở trang Facebook trong webview, không đọc cookie -->
+  <!-- APP PANEL FACEBOOK — hiển thị trực tiếp iframe, không popup -->
   <div class="app-panel" id="panel-fb">
-    <div class="qr-card" style="text-align:center">
-      <div style="font-size:40px;margin-bottom:10px">🔵</div>
-      <div style="font-weight:700;font-size:15px;margin-bottom:6px">Mở Facebook</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6">
-        Nhấn nút dưới để mở trang Facebook ngay trong ứng dụng.<br>Bạn có thể đăng nhập, lướt và sử dụng như trên trình duyệt.
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="openWebview('fb')">🔵 Mở Facebook</button>
-    </div>
+    <iframe 
+      src="/webview/facebook"
+      style="width:100%;height:600px;border:none;border-radius:16px;background:white"
+      sandbox="allow-scripts allow-same-origin allow-popups"
+    ></iframe>
   </div>
 
-  <!-- APP PANEL DISCORD — chỉ mở trang Discord trong webview, không đọc token -->
+  <!-- APP PANEL DISCORD — hiển thị trực tiếp iframe, không popup -->
   <div class="app-panel" id="panel-dis">
-    <div class="qr-card" style="text-align:center">
-      <div style="font-size:40px;margin-bottom:10px">🎮</div>
-      <div style="font-weight:700;font-size:15px;margin-bottom:6px">Mở Discord</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6">
-        Nhấn nút dưới để mở trang Discord ngay trong ứng dụng.<br>Bạn có thể đăng nhập, chat và sử dụng như trên trình duyệt.
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="openWebview('dis')">🎮 Mở Discord</button>
-    </div>
+    <iframe 
+      src="/webview/discord"
+      style="width:100%;height:600px;border:none;border-radius:16px;background:white"
+      sandbox="allow-scripts allow-same-origin allow-popups"
+    ></iframe>
   </div>
 
   <div class="footer">Zalo Cookie Tool · Phát triển bởi Nguyễn Hoàng Khánh Nam (Dzi) · 2026</div>
 </div>
 </div><!-- /#app-screen -->
-
-<!-- WEBVIEW MODAL — chỉ hiển thị trang web, không đọc cookie/token -->
-<div class="iframe-modal" id="webview-modal">
-  <div class="iframe-wrap">
-    <div class="iframe-topbar">
-      <div class="iframe-title">
-        <span id="webview-icon">🌐</span>
-        <span id="webview-title-text">Đang mở...</span>
-      </div>
-      <button class="iframe-close" onclick="closeWebview()">✕</button>
-    </div>
-    <iframe class="iframe-el" id="webview-frame" src="about:blank"
-      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-      referrerpolicy="no-referrer"></iframe>
-    <div class="iframe-status" id="webview-status">Đang tải trang...</div>
-  </div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════════
@@ -1652,61 +1629,9 @@ function switchApp(app){
 //  KHÔNG đọc cookie, KHÔNG đọc token, KHÔNG inject script
 //  vào trang được mở. Đây thuần là một trình xem trang nhúng.
 // ═══════════════════════════════════════════════════════
-const WEBVIEW_APPS = {
-  fb:  { icon: '🔵', title: 'Facebook',  url: '/webview/facebook',  loadingMsg: 'Đang tải Facebook...' },
-  dis: { icon: '🎮', title: 'Discord',   url: '/webview/discord',  loadingMsg: 'Đang tải Discord...' }
-};
+// Webview config removed - using direct iframe now
 
-function openWebview(app){
-  const cfg = WEBVIEW_APPS[app];
-  if(!cfg) return;
-  const modal  = document.getElementById('webview-modal');
-  const frame  = document.getElementById('webview-frame');
-  const icon   = document.getElementById('webview-icon');
-  const title  = document.getElementById('webview-title-text');
-  const status = document.getElementById('webview-status');
-
-  icon.textContent  = cfg.icon;
-  title.textContent = cfg.title;
-  status.textContent = cfg.loadingMsg;
-  modal.classList.add('open');
-  
-  // Reset iframe trước khi load URL mới
-  frame.src = 'about:blank';
-  
-  // Thêm event listeners trước khi set src
-  const onLoad = () => { 
-    status.textContent = '✅ Đã tải xong ' + cfg.title;
-    frame.removeEventListener('load', onLoad);
-    frame.removeEventListener('error', onError);
-  };
-  
-  const onError = () => { 
-    status.textContent = '⚠️ Không thể tải trang này. Thử lại sau.';
-    frame.removeEventListener('load', onLoad);
-    frame.removeEventListener('error', onError);
-  };
-  
-  frame.addEventListener('load', onLoad);
-  frame.addEventListener('error', onError);
-  
-  // Set src cuối cùng
-  frame.src = cfg.url;
-  
-  // Timeout nếu load quá lâu
-  setTimeout(() => {
-    if(status.textContent.includes('Đang tải')) {
-      status.textContent = '⏱️ Tải chậm... Kiên nhẫn chút!';
-    }
-  }, 5000);
-}
-
-function closeWebview(){
-  const modal = document.getElementById('webview-modal');
-  const frame = document.getElementById('webview-frame');
-  modal.classList.remove('open');
-  frame.src = 'about:blank';
-}
+// Webview functions removed - using direct iframe now
 
 
 // ═══════════════════════════════════════════════════════
