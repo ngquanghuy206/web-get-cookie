@@ -1653,8 +1653,8 @@ function switchApp(app){
 //  vào trang được mở. Đây thuần là một trình xem trang nhúng.
 // ═══════════════════════════════════════════════════════
 const WEBVIEW_APPS = {
-  fb:  { icon: '🔵', title: 'Facebook',  url: 'https://m.facebook.com/',  loadingMsg: 'Đang tải Facebook...' },
-  dis: { icon: '🎮', title: 'Discord',   url: 'https://discord.com/app',  loadingMsg: 'Đang tải Discord...' }
+  fb:  { icon: '🔵', title: 'Facebook',  url: '/webview/facebook',  loadingMsg: 'Đang tải Facebook...' },
+  dis: { icon: '🎮', title: 'Discord',   url: '/webview/discord',  loadingMsg: 'Đang tải Discord...' }
 };
 
 function openWebview(app){
@@ -1669,12 +1669,36 @@ function openWebview(app){
   icon.textContent  = cfg.icon;
   title.textContent = cfg.title;
   status.textContent = cfg.loadingMsg;
-  frame.src = cfg.url;
   modal.classList.add('open');
-
-  // Chỉ cập nhật trạng thái UI khi iframe load xong — không đọc nội dung bên trong
-  frame.onload = () => { status.textContent = '✅ Đã tải xong ' + cfg.title; };
-  frame.onerror = () => { status.textContent = '⚠️ Không thể tải trang này trong khung nhúng.'; };
+  
+  // Reset iframe trước khi load URL mới
+  frame.src = 'about:blank';
+  
+  // Thêm event listeners trước khi set src
+  const onLoad = () => { 
+    status.textContent = '✅ Đã tải xong ' + cfg.title;
+    frame.removeEventListener('load', onLoad);
+    frame.removeEventListener('error', onError);
+  };
+  
+  const onError = () => { 
+    status.textContent = '⚠️ Không thể tải trang này. Thử lại sau.';
+    frame.removeEventListener('load', onLoad);
+    frame.removeEventListener('error', onError);
+  };
+  
+  frame.addEventListener('load', onLoad);
+  frame.addEventListener('error', onError);
+  
+  // Set src cuối cùng
+  frame.src = cfg.url;
+  
+  // Timeout nếu load quá lâu
+  setTimeout(() => {
+    if(status.textContent.includes('Đang tải')) {
+      status.textContent = '⏱️ Tải chậm... Kiên nhẫn chút!';
+    }
+  }, 5000);
 }
 
 function closeWebview(){
