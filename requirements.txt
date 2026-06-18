@@ -1,9 +1,8 @@
 fastapi
-uvicorn
+uvicorn[standard]
 aiohttp
 websockets
 httpx
-zlapi
 pycryptodome
 requests
 Pillow

