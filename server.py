@@ -530,27 +530,29 @@ async def webview_proxy(url: str):
 async def webview_facebook():
     """Mở Facebook trong webview"""
     try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1"
+        }
         async with aiohttp.ClientSession() as session:
-            # Tìm cách load m.facebook.com mà không bị X-Frame-Options chặn
-            async with session.get("https://m.facebook.com/", timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            async with session.get("https://m.facebook.com/", headers=headers, timeout=aiohttp.ClientTimeout(total=10), ssl=False) as resp:
                 content = await resp.text()
-                # Loại bỏ X-Frame-Options header nếu có
                 return Response(
                     content=content,
                     media_type="text/html",
                     headers={
                         "X-Frame-Options": "ALLOWALL",
-                        "Cache-Control": "no-cache"
+                        "Cache-Control": "no-cache",
+                        "Content-Type": "text/html; charset=utf-8"
                     }
                 )
     except Exception as e:
-        html = f"""
+        html = """
         <html>
         <head><meta charset="UTF-8"><title>Facebook</title></head>
         <body style="background:#fff;color:#333;font-family:sans-serif;padding:20px;text-align:center">
-            <h2>⚠️ Không thể tải Facebook</h2>
-            <p>Thử lại sau hoặc dùng link trực tiếp</p>
-            <a href="https://m.facebook.com/" target="_blank" style="color:#1877f2">Mở Facebook tại đây</a>
+            <h2>🔐 Facebook đăng nhập</h2>
+            <p>Vui lòng đăng nhập Facebook tại đây:</p>
+            <a href="https://m.facebook.com/" target="_blank" style="display:inline-block;padding:12px 24px;background:#1877f2;color:white;text-decoration:none;border-radius:6px;font-weight:bold">Mở Facebook</a>
         </body>
         </html>
         """
@@ -560,25 +562,32 @@ async def webview_facebook():
 async def webview_discord():
     """Mở Discord trong webview"""
     try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
         async with aiohttp.ClientSession() as session:
-            async with session.get("https://discord.com/app", timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            async with session.get("https://discord.com/app", headers=headers, timeout=aiohttp.ClientTimeout(total=10), ssl=False) as resp:
                 content = await resp.text()
+                if len(content) < 1000:  # Discord returns minimal content for bot requests
+                    raise Exception("Discord returned minimal content")
                 return Response(
                     content=content,
                     media_type="text/html",
                     headers={
                         "X-Frame-Options": "ALLOWALL",
-                        "Cache-Control": "no-cache"
+                        "Cache-Control": "no-cache",
+                        "Content-Type": "text/html; charset=utf-8"
                     }
                 )
     except Exception as e:
-        html = f"""
+        html = """
         <html>
         <head><meta charset="UTF-8"><title>Discord</title></head>
         <body style="background:#fff;color:#333;font-family:sans-serif;padding:20px;text-align:center">
-            <h2>⚠️ Không thể tải Discord</h2>
-            <p>Discord có thể không hỗ trợ iframe</p>
-            <a href="https://discord.com/app" target="_blank" style="color:#5865f2">Mở Discord tại đây</a>
+            <h2>⚠️ Discord Web</h2>
+            <p>Discord không hỗ trợ mở trong iframe</p>
+            <p>Mở Discord ở tab mới để dùng</p>
+            <a href="https://discord.com/app" target="_blank" style="display:inline-block;padding:12px 24px;background:#5865f2;color:white;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:10px">Mở Discord</a>
         </body>
         </html>
         """
