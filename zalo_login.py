@@ -9,7 +9,7 @@ import random
 import re
 from enum import Enum
 from urllib.parse import urlencode
-
+# dzi meo meo
 logger = logging.getLogger("zalo")
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
